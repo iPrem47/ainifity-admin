@@ -1,14 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, ChevronDown, Check, Loader2 } from 'lucide-react';
-
-interface Reference {
-  id: string;
-  name: string;
-  referenceId: string;
-  deleted: boolean;
-  updatedAt: string;
-  totalInvestors: number;
-}
+import { Search, ChevronDown, Check, Loader2, AlertCircle } from 'lucide-react';
+import { Reference } from './types';
 
 interface ReferenceSearchDropdownProps {
   references: Reference[];
@@ -77,7 +69,7 @@ const ReferenceSearchDropdown: React.FC<ReferenceSearchDropdownProps> = ({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full px-4 py-4 border rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all bg-white text-left flex items-center justify-between ${
+        className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all bg-white text-left flex items-center justify-between ${
           error ? 'border-red-300 bg-red-50' : 'border-gray-300 hover:border-gray-400'
         }`}
       >
@@ -96,7 +88,7 @@ const ReferenceSearchDropdown: React.FC<ReferenceSearchDropdownProps> = ({
           )}
         </div>
         <ChevronDown 
-          size={20} 
+          size={18} 
           className={`text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} 
         />
       </button>
@@ -131,7 +123,10 @@ const ReferenceSearchDropdown: React.FC<ReferenceSearchDropdownProps> = ({
           {/* Error State */}
           {error && !loading && (
             <div className="p-4 text-center">
-              <p className="text-sm text-red-600">{error}</p>
+              <div className="flex items-center justify-center space-x-2">
+                <AlertCircle size={16} className="text-red-500" />
+                <p className="text-sm text-red-600">{error}</p>
+              </div>
             </div>
           )}
 
@@ -194,7 +189,10 @@ const ReferenceSearchDropdown: React.FC<ReferenceSearchDropdownProps> = ({
       )}
 
       {error && (
-        <p className="mt-2 text-sm text-red-600">{error}</p>
+        <p className="mt-2 text-sm text-red-600 flex items-center">
+          <AlertCircle size={16} className="mr-1" />
+          {error}
+        </p>
       )}
     </div>
   );

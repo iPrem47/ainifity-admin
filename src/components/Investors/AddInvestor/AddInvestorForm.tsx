@@ -1,42 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Save, ArrowLeft, Loader2, CheckCircle, AlertCircle, Plus, Minus, IndianRupee } from 'lucide-react';
-import { InvestorFormData, FormErrors } from './types';
+import { InvestorFormData, FormErrors, Reference, PaymentSystem, Account, PanCardType } from './types';
 import { validateForm, validateSingleField } from './validation';
 import FormSection from './FormSection';
 import FormField from './FormField';
 import FileUpload from './FileUpload';
 import { apiService } from '../../../services/api';
+import ReferenceSearchDropdown from './ReferenceSearchDropdown';
 
 interface AddInvestorFormProps {
   onBack: () => void;
   onSubmit: (data: InvestorFormData) => Promise<void>;
-}
-
-interface Reference {
-  id: string;
-  name: string;
-  referenceId: string;
-  deleted: boolean;
-  updatedAt: string;
-  totalInvestors: number;
-}
-
-interface PaymentSystem {
-  paymentSystemId: number;
-  name: string;
-}
-
-interface Account {
-  accountId: string;
-  name: string;
-  balance: number;
-  amountColour: string;
-  accountTypeId: number;
-}
-
-interface PanCardType {
-  id: number;
-  label: string;
 }
 
 const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) => {
@@ -84,7 +58,9 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
   const [loadingReferences, setLoadingReferences] = useState(false);
   const [loadingAccounts, setLoadingAccounts] = useState(false);
   const [loadingPanCardTypes, setLoadingPanCardTypes] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+  
+  // Selected reference state
+  const [selectedReference, setSelectedReference] = useState<Reference | null>(null);
 
   // Fetch payment systems
   useEffect(() => {
@@ -348,9 +324,22 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
 
   // Search references
   const handleReferenceSearch = (term: string) => {
-    setSearchTerm(term);
     // In a real implementation, you would call an API with the search term
     console.log('Searching references with term:', term);
+    // For now, we'll just filter the existing references
+    // In a real app, this would be an API call
+  };
+
+  // Handle reference selection
+  const handleReferenceSelect = (reference: Reference) => {
+    setSelectedReference(reference);
+    setFormData(prev => ({ 
+      ...prev, 
+      referencePerson: reference.referenceId 
+    }));
+    if (errors.referencePerson) {
+      setErrors(prev => ({ ...prev, referencePerson: '' }));
+    }
   };
 
   // Format amount for display
@@ -480,7 +469,7 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
                 <button
                   type="button"
                   onClick={decrementAmount}
-                  className="p-3 bg-gray-100 rounded-l-xl text-gray-600 hover:bg-gray-200 transition-colors border border-gray-300"
+                  className="p-3 bg-gray-100 rounded-l-xl text-gray-600 hover:bg-gray-200 transition-colors border border-gray-300 hover:border-gray-400 active:bg-gray-300"
                 >
                   <Minus size={20} />
                 </button>
@@ -506,7 +495,7 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
                 <button
                   type="button"
                   onClick={incrementAmount}
-                  className="p-3 bg-gray-100 rounded-r-xl text-gray-600 hover:bg-gray-200 transition-colors border border-gray-300"
+                  className="p-3 bg-gray-100 rounded-r-xl text-gray-600 hover:bg-gray-200 transition-colors border border-gray-300 hover:border-gray-400 active:bg-gray-300"
                 >
                   <Plus size={20} />
                 </button>
@@ -528,26 +517,31 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
                 <span className="text-red-500 mr-1">*</span>
                 Payment System
               </label>
-              <select
-                name="paymentSystem"
-                value={formData.paymentSystem}
-                onChange={handleInputChange}
-                onBlur={handleBlur}
-                className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all bg-white ${
-                  errors.paymentSystem ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                }`}
-              >
-                <option value="">Select Payment System</option>
-                {loadingPaymentSystems ? (
-                  <option value="" disabled>Loading payment systems...</option>
-                ) : (
-                  paymentSystems.map(system => (
-                    <option key={system.paymentSystemId} value={system.name}>
-                      {system.name}
-                    </option>
-                  ))
-                )}
-              </select>
+              <div className="relative">
+                <select
+                  name="paymentSystem"
+                  value={formData.paymentSystem}
+                  onChange={handleInputChange}
+                  onBlur={handleBlur}
+                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all bg-white appearance-none ${
+                    errors.paymentSystem ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  }`}
+                >
+                  <option value="">Select Payment System</option>
+                  {loadingPaymentSystems ? (
+                    <option value="" disabled>Loading payment systems...</option>
+                  ) : (
+                    paymentSystems.map(system => (
+                      <option key={system.paymentSystemId} value={system.name}>
+                        {system.name}
+                      </option>
+                    ))
+                  )}
+                </select>
+                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                  <ChevronDown size={18} className="text-gray-400" />
+                </div>
+              </div>
               {errors.paymentSystem && (
                 <p className="mt-2 text-sm text-red-600 flex items-center">
                   <AlertCircle size={16} className="mr-1" />
@@ -558,39 +552,15 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
 
             {/* Reference Person Dropdown */}
             <div className="md:col-span-2">
-              <label className="block text-sm font-semibold text-gray-700 mb-3">
-                <span className="text-red-500 mr-1">*</span>
-                Reference Person
-              </label>
-              <div className="relative">
-                <select
-                  name="referencePerson"
-                  value={formData.referencePerson}
-                  onChange={handleInputChange}
-                  onBlur={handleBlur}
-                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all bg-white ${
-                    errors.referencePerson ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                  }`}
-                >
-                  <option value="">Select Reference Person</option>
-                  <option value="0">- NA</option>
-                  {loadingReferences ? (
-                    <option value="" disabled>Loading references...</option>
-                  ) : (
-                    references.map(ref => (
-                      <option key={ref.id} value={ref.referenceId}>
-                        {`${ref.name} (${ref.referenceId})`}
-                      </option>
-                    ))
-                  )}
-                </select>
-              </div>
-              {errors.referencePerson && (
-                <p className="mt-2 text-sm text-red-600 flex items-center">
-                  <AlertCircle size={16} className="mr-1" />
-                  {errors.referencePerson}
-                </p>
-              )}
+              <ReferenceSearchDropdown
+                references={references}
+                selectedReference={selectedReference}
+                onSelect={handleReferenceSelect}
+                onSearch={handleReferenceSearch}
+                loading={loadingReferences}
+                error={errors.referencePerson}
+                required
+              />
             </div>
           </div>
         </FormSection>
@@ -604,26 +574,31 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
                 <span className="text-red-500 mr-1">*</span>
                 Payment Received Account
               </label>
-              <select
-                name="paymentReceivedAccount"
-                value={formData.paymentReceivedAccount}
-                onChange={handleInputChange}
-                onBlur={handleBlur}
-                className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all bg-white ${
-                  errors.paymentReceivedAccount ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                }`}
-              >
-                <option value="">Select Account</option>
-                {loadingAccounts ? (
-                  <option value="" disabled>Loading accounts...</option>
-                ) : (
-                  accounts.map(account => (
-                    <option key={account.accountId} value={account.accountId}>
-                      {account.name}
-                    </option>
-                  ))
-                )}
-              </select>
+              <div className="relative">
+                <select
+                  name="paymentReceivedAccount"
+                  value={formData.paymentReceivedAccount}
+                  onChange={handleInputChange}
+                  onBlur={handleBlur}
+                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all bg-white appearance-none ${
+                    errors.paymentReceivedAccount ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  }`}
+                >
+                  <option value="">Select Account</option>
+                  {loadingAccounts ? (
+                    <option value="" disabled>Loading accounts...</option>
+                  ) : (
+                    accounts.map(account => (
+                      <option key={account.accountId} value={account.accountId}>
+                        {account.name}
+                      </option>
+                    ))
+                  )}
+                </select>
+                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                  <ChevronDown size={18} className="text-gray-400" />
+                </div>
+              </div>
               {errors.paymentReceivedAccount && (
                 <p className="mt-2 text-sm text-red-600 flex items-center">
                   <AlertCircle size={16} className="mr-1" />
