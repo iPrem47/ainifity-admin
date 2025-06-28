@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Save, ArrowLeft, Loader2, CheckCircle, AlertCircle, Plus, Minus, IndianRupee, ChevronDown } from 'lucide-react';
 import { InvestorFormData, FormErrors, Reference, PaymentSystem, Account, PanCardType } from './types';
 import { validateForm, validateSingleField } from './validation';
@@ -7,6 +7,7 @@ import FormField from './FormField';
 import FileUpload from './FileUpload';
 import { apiService } from '../../../services/api';
 import ReferenceSearchDropdown from './ReferenceSearchDropdown';
+import { debounce } from 'lodash';
 
 interface AddInvestorFormProps {
   onBack: () => void;
@@ -61,6 +62,16 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
   
   // Selected reference state
   const [selectedReference, setSelectedReference] = useState<Reference | null>(null);
+
+  // Dropdown states
+  const [isPaymentSystemOpen, setIsPaymentSystemOpen] = useState(false);
+  const [isAccountOpen, setIsAccountOpen] = useState(false);
+  const [isRelationOpen, setIsRelationOpen] = useState(false);
+  const [isStateOpen, setIsStateOpen] = useState(false);
+
+  // PAN card validation states
+  const [panCardStatus, setPanCardStatus] = useState<'valid' | 'invalid' | null>(null);
+  const [panCardError, setPanCardError] = useState<string | null>(null);
 
   // Fetch payment systems
   useEffect(() => {
@@ -247,7 +258,41 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
         [name]: ''
       }));
     }
+
+    // Check PAN card when user enters it
+    if (name === 'panCardNumber' && value) {
+      handleCheckPanCard(value);
+    }
   };
+
+  // PAN card validation
+  const handleCheckPanCard = debounce(async (input: string) => {
+    const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+
+    if (!input || !panRegex.test(input.toUpperCase())) {
+      setPanCardError("Please enter a valid PAN card number.");
+      setPanCardStatus("invalid");
+      return;
+    }
+
+    try {
+      const response = await apiService.get(`/user-finance/checkPanCard?panCardNumber=${input.toUpperCase()}`);
+
+      if (response.data?.exists) {
+        setPanCardError("This PAN card is already registered.");
+        setPanCardStatus("invalid");
+      } else {
+        setPanCardError(null);
+        setPanCardStatus("valid");
+      }
+    } catch (error: any) {
+      setPanCardError(
+        error?.response?.data?.message ||
+          "Failed to verify PAN card. Please try again."
+      );
+      setPanCardStatus("invalid");
+    }
+  }, 500);
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -350,6 +395,39 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount);
+  };
+
+  // Dropdown handlers
+  const handlePaymentSystemSelect = (id: number, name: string) => {
+    setFormData(prev => ({ ...prev, paymentSystem: name }));
+    setIsPaymentSystemOpen(false);
+    if (errors.paymentSystem) {
+      setErrors(prev => ({ ...prev, paymentSystem: '' }));
+    }
+  };
+
+  const handleAccountSelect = (id: string, name: string) => {
+    setFormData(prev => ({ ...prev, paymentReceivedAccount: id }));
+    setIsAccountOpen(false);
+    if (errors.paymentReceivedAccount) {
+      setErrors(prev => ({ ...prev, paymentReceivedAccount: '' }));
+    }
+  };
+
+  const handleRelationSelect = (value: string) => {
+    setFormData(prev => ({ ...prev, nomineeRelation: value }));
+    setIsRelationOpen(false);
+    if (errors.nomineeRelation) {
+      setErrors(prev => ({ ...prev, nomineeRelation: '' }));
+    }
+  };
+
+  const handleStateSelect = (value: string) => {
+    setFormData(prev => ({ ...prev, state: value }));
+    setIsStateOpen(false);
+    if (errors.state) {
+      setErrors(prev => ({ ...prev, state: '' }));
+    }
   };
 
   return (
@@ -518,29 +596,45 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
                 Payment System
               </label>
               <div className="relative">
-                <select
-                  name="paymentSystem"
-                  value={formData.paymentSystem}
-                  onChange={handleInputChange}
-                  onBlur={handleBlur}
-                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all bg-white appearance-none ${
+                <button
+                  type="button"
+                  onClick={() => setIsPaymentSystemOpen(!isPaymentSystemOpen)}
+                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all bg-white text-left flex items-center justify-between ${
                     errors.paymentSystem ? 'border-red-300 bg-red-50' : 'border-gray-300'
                   }`}
                 >
-                  <option value="">Select Payment System</option>
-                  {loadingPaymentSystems ? (
-                    <option value="" disabled>Loading payment systems...</option>
-                  ) : (
-                    paymentSystems.map(system => (
-                      <option key={system.paymentSystemId} value={system.name}>
-                        {system.name}
-                      </option>
-                    ))
-                  )}
-                </select>
-                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                  <ChevronDown size={18} className="text-gray-400" />
-                </div>
+                  <span className={formData.paymentSystem ? 'text-gray-900' : 'text-gray-400'}>
+                    {formData.paymentSystem || 'Select Payment System'}
+                  </span>
+                  <ChevronDown 
+                    size={20} 
+                    className={`text-gray-400 transition-transform ${isPaymentSystemOpen ? 'rotate-180' : ''}`} 
+                  />
+                </button>
+                
+                {isPaymentSystemOpen && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                    {loadingPaymentSystems ? (
+                      <div className="p-4 text-center">
+                        <Loader2 size={20} className="animate-spin mx-auto text-cyan-500 mb-2" />
+                        <p className="text-sm text-gray-500">Loading payment systems...</p>
+                      </div>
+                    ) : (
+                      paymentSystems.map(system => (
+                        <div 
+                          key={system.paymentSystemId} 
+                          className="px-4 py-3 hover:bg-gray-50 cursor-pointer flex items-center justify-between"
+                          onClick={() => handlePaymentSystemSelect(system.paymentSystemId, system.name)}
+                        >
+                          <span className="text-gray-900">{system.name}</span>
+                          {formData.paymentSystem === system.name && (
+                            <CheckCircle size={16} className="text-cyan-500" />
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
               </div>
               {errors.paymentSystem && (
                 <p className="mt-2 text-sm text-red-600 flex items-center">
@@ -575,29 +669,50 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
                 Payment Received Account
               </label>
               <div className="relative">
-                <select
-                  name="paymentReceivedAccount"
-                  value={formData.paymentReceivedAccount}
-                  onChange={handleInputChange}
-                  onBlur={handleBlur}
-                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all bg-white appearance-none ${
+                <button
+                  type="button"
+                  onClick={() => setIsAccountOpen(!isAccountOpen)}
+                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all bg-white text-left flex items-center justify-between ${
                     errors.paymentReceivedAccount ? 'border-red-300 bg-red-50' : 'border-gray-300'
                   }`}
                 >
-                  <option value="">Select Account</option>
-                  {loadingAccounts ? (
-                    <option value="" disabled>Loading accounts...</option>
-                  ) : (
-                    accounts.map(account => (
-                      <option key={account.accountId} value={account.accountId}>
-                        {account.name}
-                      </option>
-                    ))
-                  )}
-                </select>
-                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                  <ChevronDown size={18} className="text-gray-400" />
-                </div>
+                  <span className={formData.paymentReceivedAccount ? 'text-gray-900' : 'text-gray-400'}>
+                    {accounts.find(acc => acc.accountId === formData.paymentReceivedAccount)?.name || 'Select Account'}
+                  </span>
+                  <ChevronDown 
+                    size={20} 
+                    className={`text-gray-400 transition-transform ${isAccountOpen ? 'rotate-180' : ''}`} 
+                  />
+                </button>
+                
+                {isAccountOpen && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                    {loadingAccounts ? (
+                      <div className="p-4 text-center">
+                        <Loader2 size={20} className="animate-spin mx-auto text-cyan-500 mb-2" />
+                        <p className="text-sm text-gray-500">Loading accounts...</p>
+                      </div>
+                    ) : (
+                      accounts.map(account => (
+                        <div 
+                          key={account.accountId} 
+                          className="px-4 py-3 hover:bg-gray-50 cursor-pointer flex items-center justify-between"
+                          onClick={() => handleAccountSelect(account.accountId, account.name)}
+                        >
+                          <div>
+                            <span className="text-gray-900">{account.name}</span>
+                            <span className={`ml-2 text-xs ${account.amountColour === 'green' ? 'text-green-600' : 'text-red-600'}`}>
+                              {account.balance.toLocaleString()}
+                            </span>
+                          </div>
+                          {formData.paymentReceivedAccount === account.accountId && (
+                            <CheckCircle size={16} className="text-cyan-500" />
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
               </div>
               {errors.paymentReceivedAccount && (
                 <p className="mt-2 text-sm text-red-600 flex items-center">
@@ -682,17 +797,55 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
               required
               placeholder="Nominee Name"
             />
-            <FormField
-              label="Nominee Relation"
-              name="nomineeRelation"
-              value={formData.nomineeRelation}
-              onChange={handleInputChange}
-              onBlur={handleBlur}
-              error={errors.nomineeRelation}
-              required
-              options={relationOptions}
-              placeholder="Select Nominee Relation"
-            />
+            
+            {/* Nominee Relation Dropdown */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
+                <span className="text-red-500 mr-1">*</span>
+                Nominee Relation
+              </label>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setIsRelationOpen(!isRelationOpen)}
+                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all bg-white text-left flex items-center justify-between ${
+                    errors.nomineeRelation ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  }`}
+                >
+                  <span className={formData.nomineeRelation ? 'text-gray-900' : 'text-gray-400'}>
+                    {formData.nomineeRelation || 'Select Nominee Relation'}
+                  </span>
+                  <ChevronDown 
+                    size={20} 
+                    className={`text-gray-400 transition-transform ${isRelationOpen ? 'rotate-180' : ''}`} 
+                  />
+                </button>
+                
+                {isRelationOpen && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                    {relationOptions.map(option => (
+                      <div 
+                        key={option.value} 
+                        className="px-4 py-3 hover:bg-gray-50 cursor-pointer flex items-center justify-between"
+                        onClick={() => handleRelationSelect(option.value)}
+                      >
+                        <span className="text-gray-900">{option.label}</span>
+                        {formData.nomineeRelation === option.value && (
+                          <CheckCircle size={16} className="text-cyan-500" />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {errors.nomineeRelation && (
+                <p className="mt-2 text-sm text-red-600 flex items-center">
+                  <AlertCircle size={16} className="mr-1" />
+                  {errors.nomineeRelation}
+                </p>
+              )}
+            </div>
+            
             <FormField
               label="Nominee Aadhar Card Number"
               name="nomineeAadharNumber"
@@ -746,16 +899,49 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
               </div>
             </div>
 
-            <FormField
-              label="PAN Card Number"
-              name="panCardNumber"
-              value={formData.panCardNumber}
-              onChange={handleInputChange}
-              onBlur={handleBlur}
-              error={errors.panCardNumber}
-              required
-              placeholder="Enter PAN Card Number"
-            />
+            {/* PAN Card Number with validation */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
+                <span className="text-red-500 mr-1">*</span>
+                PAN Card Number
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  name="panCardNumber"
+                  value={formData.panCardNumber}
+                  onChange={handleInputChange}
+                  onBlur={handleBlur}
+                  placeholder="Enter PAN Card Number"
+                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all bg-white ${
+                    errors.panCardNumber || panCardStatus === 'invalid' 
+                      ? 'border-red-300 bg-red-50' 
+                      : panCardStatus === 'valid'
+                      ? 'border-green-300 bg-green-50'
+                      : 'border-gray-300'
+                  }`}
+                />
+                {panCardStatus === 'valid' && (
+                  <CheckCircle size={20} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-500" />
+                )}
+                {panCardStatus === 'invalid' && (
+                  <AlertCircle size={20} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-500" />
+                )}
+              </div>
+              {(errors.panCardNumber || panCardError) && (
+                <p className="mt-2 text-sm text-red-600 flex items-center">
+                  <AlertCircle size={16} className="mr-1" />
+                  {errors.panCardNumber || panCardError}
+                </p>
+              )}
+              {panCardStatus === 'valid' && (
+                <p className="mt-2 text-sm text-green-600 flex items-center">
+                  <CheckCircle size={16} className="mr-1" />
+                  PAN card is valid and available
+                </p>
+              )}
+            </div>
+            
             <FormField
               label="Aadhar Card"
               name="aadharCard"
@@ -796,17 +982,55 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
               required
               placeholder="District"
             />
-            <FormField
-              label="State"
-              name="state"
-              value={formData.state}
-              onChange={handleInputChange}
-              onBlur={handleBlur}
-              error={errors.state}
-              required
-              options={stateOptions}
-              placeholder="Select State"
-            />
+            
+            {/* State Dropdown */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
+                <span className="text-red-500 mr-1">*</span>
+                State
+              </label>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setIsStateOpen(!isStateOpen)}
+                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all bg-white text-left flex items-center justify-between ${
+                    errors.state ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  }`}
+                >
+                  <span className={formData.state ? 'text-gray-900' : 'text-gray-400'}>
+                    {formData.state || 'Select State'}
+                  </span>
+                  <ChevronDown 
+                    size={20} 
+                    className={`text-gray-400 transition-transform ${isStateOpen ? 'rotate-180' : ''}`} 
+                  />
+                </button>
+                
+                {isStateOpen && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                    {stateOptions.map(option => (
+                      <div 
+                        key={option.value} 
+                        className="px-4 py-3 hover:bg-gray-50 cursor-pointer flex items-center justify-between"
+                        onClick={() => handleStateSelect(option.value)}
+                      >
+                        <span className="text-gray-900">{option.label}</span>
+                        {formData.state === option.value && (
+                          <CheckCircle size={16} className="text-cyan-500" />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {errors.state && (
+                <p className="mt-2 text-sm text-red-600 flex items-center">
+                  <AlertCircle size={16} className="mr-1" />
+                  {errors.state}
+                </p>
+              )}
+            </div>
+            
             <FormField
               label="PinCode"
               name="pinCode"

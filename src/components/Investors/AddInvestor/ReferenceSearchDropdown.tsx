@@ -94,7 +94,7 @@ const ReferenceSearchDropdown: React.FC<ReferenceSearchDropdownProps> = ({
       </button>
 
       {isOpen && (
-        <div className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-lg max-h-80 overflow-hidden">
+        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-80 overflow-hidden">
           {/* Search Input */}
           <div className="p-4 border-b border-gray-100">
             <div className="relative">

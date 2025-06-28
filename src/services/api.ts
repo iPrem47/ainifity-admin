@@ -128,6 +128,12 @@ class ApiService {
     return response.data;
   }
 
+  // Check PAN Card endpoint
+  async checkPanCard(panCardNumber: string) {
+    const response = await this.api.get(`/user-finance/checkPanCard?panCardNumber=${panCardNumber}`);
+    return response.data;
+  }
+
   // Add Funds endpoints
   async getAddFundsRequests(params: { page: number; limit: number; search?: string; transactionStatusId?: number | null }) {
     const queryParams = new URLSearchParams({
