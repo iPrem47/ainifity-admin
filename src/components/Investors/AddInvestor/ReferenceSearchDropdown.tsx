@@ -47,8 +47,7 @@ const ReferenceSearchDropdown: React.FC<ReferenceSearchDropdownProps> = ({
     }
   }, [isOpen]);
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
+  const handleSearchChange = (value: string) => {
     setSearchTerm(value);
     onSearch(value);
   };
@@ -104,7 +103,7 @@ const ReferenceSearchDropdown: React.FC<ReferenceSearchDropdownProps> = ({
                 type="text"
                 placeholder="Search references..."
                 value={searchTerm}
-                onChange={handleSearchChange}
+                onChange={(e) => handleSearchChange(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-sm"
               />
             </div>
@@ -114,7 +113,7 @@ const ReferenceSearchDropdown: React.FC<ReferenceSearchDropdownProps> = ({
           {loading && (
             <div className="p-4 text-center">
               <div className="flex items-center justify-center space-x-2">
-                <Loader2 size={16} className="animate-spin text-cyan-500" />
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-cyan-500"></div>
                 <span className="text-sm text-gray-600">Searching...</span>
               </div>
             </div>
@@ -123,10 +122,7 @@ const ReferenceSearchDropdown: React.FC<ReferenceSearchDropdownProps> = ({
           {/* Error State */}
           {error && !loading && (
             <div className="p-4 text-center">
-              <div className="flex items-center justify-center space-x-2">
-                <AlertCircle size={16} className="text-red-500" />
-                <p className="text-sm text-red-600">{error}</p>
-              </div>
+              <p className="text-sm text-red-600">{error}</p>
             </div>
           )}
 

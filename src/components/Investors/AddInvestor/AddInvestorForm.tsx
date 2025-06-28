@@ -278,7 +278,7 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
     try {
       const response = await apiService.checkPanCard(input.toUpperCase());
 
-      if (response.data?.exists) {
+      if (response?.data?.exists) {
         setPanCardError("This PAN card is already registered.");
         setPanCardStatus("invalid");
       } else {
@@ -1213,6 +1213,7 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
               <button
                 type="button"
                 onClick={onBack}
+                disabled={isSubmitting}
                 className="px-6 py-3 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-xl transition-colors font-medium"
               >
                 Cancel
