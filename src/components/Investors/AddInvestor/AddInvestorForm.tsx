@@ -276,7 +276,7 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
     }
 
     try {
-      const response = await apiService.get(`/user-finance/checkPanCard?panCardNumber=${input.toUpperCase()}`);
+      const response = await apiService.checkPanCard(input.toUpperCase());
 
       if (response.data?.exists) {
         setPanCardError("This PAN card is already registered.");
@@ -329,15 +329,90 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
     setSubmitError(null);
 
     try {
-      await onSubmit(formData);
-      setSubmitSuccess(true);
+      // Create FormData for file uploads
+      const submitData = new FormData();
       
-      // Reset form after successful submission
-      setTimeout(() => {
-        setSubmitSuccess(false);
-        onBack();
-      }, 2000);
+      // Add all form fields to FormData
+      submitData.append("nameAsPerPanCard", formData.nameAsPanCard);
+      submitData.append("firstName", formData.firstName);
+      submitData.append("lastName", formData.lastName);
+      submitData.append("email", formData.email);
+      
+      // Format phone number with +91 prefix
+      const phoneNumber = formData.phoneNumber.startsWith('+91') 
+        ? formData.phoneNumber 
+        : `+91${formData.phoneNumber}`;
+      submitData.append("phoneNumber", phoneNumber);
+      
+      submitData.append("amount", formData.amount.toString());
+      submitData.append("paymentSystemId", paymentSystems.find(ps => ps.name === formData.paymentSystem)?.paymentSystemId.toString() || "");
+      submitData.append("referenceId", formData.referencePerson || "");
+      submitData.append("paymentReceivedAccountId", formData.paymentReceivedAccount);
+      
+      // Format date
+      const formattedDate = new Date(formData.date).toISOString().split('T')[0];
+      submitData.append("asOfDate", `${formattedDate} 00:00:00`);
+      
+      submitData.append("bankName", formData.bankName);
+      submitData.append("bankAccountNumber", formData.bankAccountNumber);
+      submitData.append("ifscCode", formData.ifsc);
+      submitData.append("nomineeName", formData.nomineeName);
+      submitData.append("nomineeRelation", formData.nomineeRelation);
+      submitData.append("nomineeAadharCardNumber", formData.nomineeAadharNumber);
+      
+      // Get panCardTypeId from the selected label
+      const panCardTypeId = panCardTypes.find(type => type.label === formData.panCardAccountType)?.id.toString() || "1";
+      submitData.append("panCardTypeId", panCardTypeId);
+      
+      submitData.append("panCardNumber", formData.panCardNumber.toUpperCase());
+      submitData.append("aadharCardNumber", formData.aadharCard);
+      submitData.append("address1", formData.addressLine1);
+      submitData.append("address2", formData.addressLine2 || "");
+      submitData.append("district", formData.district);
+      submitData.append("state", formData.state);
+      submitData.append("pinCode", formData.pinCode);
+      submitData.append("country", formData.country);
+      submitData.append("description", formData.description || "");
+      submitData.append("investorStatusId", formData.activeInvestor ? "1" : "0");
+      submitData.append("nameAsPerBank", formData.nameAsPanCard);
+      
+      // Append files
+      if (formData.aadharCardFile) {
+        submitData.append("aadharcard", formData.aadharCardFile);
+      }
+      
+      if (formData.panCardFile) {
+        submitData.append("pancard", formData.panCardFile);
+      }
+      
+      if (formData.chequePassbookFile) {
+        submitData.append("checkbookPassbook", formData.chequePassbookFile);
+      }
+      
+      if (formData.bankStatementFile) {
+        submitData.append("bankStatement", formData.bankStatementFile);
+      }
+      
+      if (formData.signatureFile) {
+        submitData.append("signature", formData.signatureFile);
+      }
+
+      // Call API to add investor
+      const response = await apiService.addInvestor(submitData);
+      
+      if (response.success) {
+        setSubmitSuccess(true);
+        
+        // Reset form after successful submission
+        setTimeout(() => {
+          setSubmitSuccess(false);
+          onBack();
+        }, 2000);
+      } else {
+        throw new Error(response.message || 'Failed to add investor');
+      }
     } catch (error: any) {
+      console.error('Error adding investor:', error);
       setSubmitError(error.message || 'Failed to add investor. Please try again.');
     } finally {
       setIsSubmitting(false);
@@ -387,16 +462,6 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
     }
   };
 
-  // Format amount for display
-  const formatAmount = (amount: number): string => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
-
   // Dropdown handlers
   const handlePaymentSystemSelect = (id: number, name: string) => {
     setFormData(prev => ({ ...prev, paymentSystem: name }));
@@ -428,6 +493,16 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
     if (errors.state) {
       setErrors(prev => ({ ...prev, state: '' }));
     }
+  };
+
+  // Format amount for display
+  const formatAmount = (amount: number): string => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
   };
 
   return (

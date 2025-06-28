@@ -130,7 +130,17 @@ class ApiService {
 
   // Check PAN Card endpoint
   async checkPanCard(panCardNumber: string) {
-    const response = await this.api.get(`/user-finance/checkPanCard?panCardNumber=${panCardNumber}`);
+    const response = await this.api.post('/user-finance/checkPanCard', { panCardNumber });
+    return response.data;
+  }
+
+  // Add Investor endpoint
+  async addInvestor(formData: FormData) {
+    const response = await this.api.post('/investor/admin/addInvestor', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return response.data;
   }
 

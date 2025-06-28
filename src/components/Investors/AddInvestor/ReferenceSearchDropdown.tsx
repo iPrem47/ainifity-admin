@@ -88,7 +88,7 @@ const ReferenceSearchDropdown: React.FC<ReferenceSearchDropdownProps> = ({
           )}
         </div>
         <ChevronDown 
-          size={18} 
+          size={20} 
           className={`text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} 
         />
       </button>
