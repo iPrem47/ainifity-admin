@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Save, ArrowLeft, Loader2, CheckCircle, AlertCircle, Plus, Minus, IndianRupee } from 'lucide-react';
+import { Save, ArrowLeft, Loader2, CheckCircle, AlertCircle, Plus, Minus, IndianRupee, ChevronDown } from 'lucide-react';
 import { InvestorFormData, FormErrors, Reference, PaymentSystem, Account, PanCardType } from './types';
 import { validateForm, validateSingleField } from './validation';
 import FormSection from './FormSection';
