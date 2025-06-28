@@ -85,6 +85,22 @@ class ApiService {
     return response.data;
   }
 
+  // Check PAN Card endpoint
+  async checkPanCard(panCardNumber: string) {
+    const response = await this.api.post('/user-finance/checkPanCard', { panCardNumber });
+    return response.data;
+  }
+
+  // Add Investor endpoint
+  async addInvestor(formData: FormData) {
+    const response = await this.api.post('/investor/admin/addInvestor', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  }
+
   // Delete investor endpoint
   async deleteInvestor(investorId: string) {
     const response = await this.api.delete(`/investor/admin/delete/${investorId}`);
@@ -125,22 +141,6 @@ class ApiService {
     console.log('Fetching investors with URL:', `/investor/admin/all?${queryParams.toString()}`);
     
     const response = await this.api.get(`/investor/admin/all?${queryParams.toString()}`);
-    return response.data;
-  }
-
-  // Check PAN Card endpoint
-  async checkPanCard(panCardNumber: string) {
-    const response = await this.api.post('/user-finance/checkPanCard', { panCardNumber });
-    return response.data;
-  }
-
-  // Add Investor endpoint
-  async addInvestor(formData: FormData) {
-    const response = await this.api.post('/investor/admin/addInvestor', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
     return response.data;
   }
 

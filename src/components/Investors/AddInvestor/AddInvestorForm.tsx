@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Save, ArrowLeft, Loader2, CheckCircle, AlertCircle, Plus, Minus, IndianRupee, ChevronDown } from 'lucide-react';
 import { InvestorFormData, FormErrors, Reference, PaymentSystem, Account, PanCardType } from './types';
 import { validateForm, validateSingleField } from './validation';
@@ -349,10 +349,6 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
       submitData.append("referenceId", formData.referencePerson || "");
       submitData.append("paymentReceivedAccountId", formData.paymentReceivedAccount);
       
-      // Format date
-      const formattedDate = new Date(formData.date).toISOString().split('T')[0];
-      submitData.append("asOfDate", `${formattedDate} 00:00:00`);
-      
       submitData.append("bankName", formData.bankName);
       submitData.append("bankAccountNumber", formData.bankAccountNumber);
       submitData.append("ifscCode", formData.ifsc);
@@ -372,7 +368,6 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
       submitData.append("state", formData.state);
       submitData.append("pinCode", formData.pinCode);
       submitData.append("country", formData.country);
-      submitData.append("description", formData.description || "");
       submitData.append("investorStatusId", formData.activeInvestor ? "1" : "0");
       submitData.append("nameAsPerBank", formData.nameAsPanCard);
       
