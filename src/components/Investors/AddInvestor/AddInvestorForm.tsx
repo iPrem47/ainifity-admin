@@ -1,14 +1,42 @@
-import React, { useState } from 'react';
-import { Save, ArrowLeft, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Save, ArrowLeft, Loader2, CheckCircle, AlertCircle, Plus, Minus, IndianRupee } from 'lucide-react';
 import { InvestorFormData, FormErrors } from './types';
 import { validateForm, validateSingleField } from './validation';
 import FormSection from './FormSection';
 import FormField from './FormField';
 import FileUpload from './FileUpload';
+import { apiService } from '../../../services/api';
 
 interface AddInvestorFormProps {
   onBack: () => void;
   onSubmit: (data: InvestorFormData) => Promise<void>;
+}
+
+interface Reference {
+  id: string;
+  name: string;
+  referenceId: string;
+  deleted: boolean;
+  updatedAt: string;
+  totalInvestors: number;
+}
+
+interface PaymentSystem {
+  paymentSystemId: number;
+  name: string;
+}
+
+interface Account {
+  accountId: string;
+  name: string;
+  balance: number;
+  amountColour: string;
+  accountTypeId: number;
+}
+
+interface PanCardType {
+  id: number;
+  label: string;
 }
 
 const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) => {
@@ -18,7 +46,7 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
     lastName: '',
     email: '',
     phoneNumber: '',
-    amount: 500000,
+    amount: 500000, // Default amount
     paymentSystem: '',
     referencePerson: '',
     paymentReceivedAccount: '',
@@ -47,18 +75,157 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const paymentSystemOptions = [
-    { value: 'Monthly', label: 'Monthly' },
-    { value: 'Quarterly', label: 'Quarterly' },
-    { value: 'Yearly', label: 'Yearly' },
-    { value: 'None', label: 'None' },
-  ];
+  // API data states
+  const [paymentSystems, setPaymentSystems] = useState<PaymentSystem[]>([]);
+  const [references, setReferences] = useState<Reference[]>([]);
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [panCardTypes, setPanCardTypes] = useState<PanCardType[]>([]);
+  const [loadingPaymentSystems, setLoadingPaymentSystems] = useState(false);
+  const [loadingReferences, setLoadingReferences] = useState(false);
+  const [loadingAccounts, setLoadingAccounts] = useState(false);
+  const [loadingPanCardTypes, setLoadingPanCardTypes] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
-  const paymentAccountOptions = [
-    { value: 'Dharma HDFC', label: 'Dharma HDFC' },
-    { value: 'Dharma SBI', label: 'Dharma SBI' },
-    { value: 'Dharma ICICI', label: 'Dharma ICICI' },
-  ];
+  // Fetch payment systems
+  useEffect(() => {
+    const fetchPaymentSystems = async () => {
+      try {
+        setLoadingPaymentSystems(true);
+        const response = await apiService.get('/investor/getAllPaymentSystem');
+        if (response.success && response.data) {
+          setPaymentSystems(response.data);
+        }
+      } catch (error) {
+        console.error('Error fetching payment systems:', error);
+        // Fallback data
+        setPaymentSystems([
+          { paymentSystemId: 7, name: "Weekly" },
+          { paymentSystemId: 31, name: "Monthly" },
+          { paymentSystemId: 0, name: "None" }
+        ]);
+      } finally {
+        setLoadingPaymentSystems(false);
+      }
+    };
+
+    fetchPaymentSystems();
+  }, []);
+
+  // Fetch references
+  useEffect(() => {
+    const fetchReferences = async () => {
+      try {
+        setLoadingReferences(true);
+        const response = await apiService.get('/references');
+        if (response && response.results) {
+          setReferences(response.results);
+        }
+      } catch (error) {
+        console.error('Error fetching references:', error);
+        // Fallback data
+        setReferences([
+          {
+            id: "67f7a173eb52c64544c295b4",
+            name: "Smit Patel",
+            referenceId: "bae074ff-88f2-497f-8e56-ded52c79031d",
+            deleted: false,
+            updatedAt: "2025-04-10T10:46:11.916Z",
+            totalInvestors: 0
+          },
+          {
+            id: "67f7a182eb52c64544c295b7",
+            name: "Akhil Ramani",
+            referenceId: "3c258366-ddf1-412f-8e81-6927fb3e2863",
+            deleted: false,
+            updatedAt: "2025-04-10T10:46:26.137Z",
+            totalInvestors: 0
+          },
+          {
+            id: "67f7a189eb52c64544c295ba",
+            name: "Dharma",
+            referenceId: "24f07be5-d27b-4ea7-9652-d979fd488268",
+            deleted: false,
+            updatedAt: "2025-06-03T04:57:15.035Z",
+            totalInvestors: 1732
+          }
+        ]);
+      } finally {
+        setLoadingReferences(false);
+      }
+    };
+
+    fetchReferences();
+  }, []);
+
+  // Fetch accounts
+  useEffect(() => {
+    const fetchAccounts = async () => {
+      try {
+        setLoadingAccounts(true);
+        const response = await apiService.get('/transaction-accounts/getAllAccount?page=1&limit=50');
+        if (response.success && response.data) {
+          setAccounts(response.data);
+        }
+      } catch (error) {
+        console.error('Error fetching accounts:', error);
+        // Fallback data
+        setAccounts([
+          {
+            accountId: "85d4f0cb-49ec-4eef-9c21-3758e8ae6c39",
+            name: "Dharma HDFC",
+            balance: 0,
+            amountColour: "green",
+            accountTypeId: 3
+          },
+          {
+            accountId: "93f9fd53-a4ce-4c42-b83d-da7cab0d97ef",
+            name: "Dharma IDFC",
+            balance: 0,
+            amountColour: "green",
+            accountTypeId: 3
+          },
+          {
+            accountId: "8b94ea62-ded3-472b-af9e-f348d0b2d8f8",
+            name: "AINFINITY",
+            balance: -19178400,
+            amountColour: "red",
+            accountTypeId: 3
+          }
+        ]);
+      } finally {
+        setLoadingAccounts(false);
+      }
+    };
+
+    fetchAccounts();
+  }, []);
+
+  // Fetch PAN card types
+  useEffect(() => {
+    const fetchPanCardTypes = async () => {
+      try {
+        setLoadingPanCardTypes(true);
+        const response = await apiService.get('/investor/getAllPanCardType');
+        if (response.success && response.data) {
+          // Filter out null values
+          const filteredTypes = response.data.filter((type: PanCardType | null) => type !== null);
+          setPanCardTypes(filteredTypes);
+        }
+      } catch (error) {
+        console.error('Error fetching PAN card types:', error);
+        // Fallback data
+        setPanCardTypes([
+          { id: 1, label: "Individual" },
+          { id: 2, label: "HUF" },
+          { id: 3, label: "Minor" }
+        ]);
+      } finally {
+        setLoadingPanCardTypes(false);
+      }
+    };
+
+    fetchPanCardTypes();
+  }, []);
 
   const relationOptions = [
     { value: 'Father', label: 'Father' },
@@ -154,6 +321,46 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // Amount increment/decrement handlers
+  const incrementAmount = () => {
+    setFormData(prev => ({
+      ...prev,
+      amount: prev.amount + 500000
+    }));
+    if (errors.amount) {
+      setErrors(prev => ({ ...prev, amount: '' }));
+    }
+  };
+
+  const decrementAmount = () => {
+    if (formData.amount > 500000) {
+      setFormData(prev => ({
+        ...prev,
+        amount: prev.amount - 500000
+      }));
+      if (errors.amount) {
+        setErrors(prev => ({ ...prev, amount: '' }));
+      }
+    }
+  };
+
+  // Search references
+  const handleReferenceSearch = (term: string) => {
+    setSearchTerm(term);
+    // In a real implementation, you would call an API with the search term
+    console.log('Searching references with term:', term);
+  };
+
+  // Format amount for display
+  const formatAmount = (amount: number): string => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
   };
 
   return (
@@ -263,39 +470,127 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
         {/* Investment Details */}
         <FormSection title="Investment Details">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <FormField
-              label="Amount"
-              name="amount"
-              type="number"
-              value={formData.amount}
-              onChange={handleInputChange}
-              onBlur={handleBlur}
-              error={errors.amount}
-              required
-              placeholder="500,000"
-            />
-            <FormField
-              label="Payment System"
-              name="paymentSystem"
-              value={formData.paymentSystem}
-              onChange={handleInputChange}
-              onBlur={handleBlur}
-              error={errors.paymentSystem}
-              required
-              options={paymentSystemOptions}
-              placeholder="Select Payment System"
-            />
-            <div className="md:col-span-2">
-              <FormField
-                label="Reference Person"
-                name="referencePerson"
-                value={formData.referencePerson}
+            {/* Amount with increment/decrement buttons */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
+                <span className="text-red-500 mr-1">*</span>
+                Amount
+              </label>
+              <div className="flex items-center">
+                <button
+                  type="button"
+                  onClick={decrementAmount}
+                  className="p-3 bg-gray-100 rounded-l-xl text-gray-600 hover:bg-gray-200 transition-colors border border-gray-300"
+                >
+                  <Minus size={20} />
+                </button>
+                <div className="flex-1 relative">
+                  <IndianRupee className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <input
+                    type="text"
+                    name="amount"
+                    value={formData.amount.toLocaleString()}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/,/g, '');
+                      const numValue = value === '' ? 0 : parseInt(value);
+                      if (!isNaN(numValue)) {
+                        setFormData(prev => ({ ...prev, amount: numValue }));
+                      }
+                    }}
+                    onBlur={handleBlur}
+                    className={`w-full pl-10 pr-4 py-3 border-t border-b border-gray-300 focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all bg-white text-center text-xl font-bold ${
+                      errors.amount ? 'border-red-300 bg-red-50' : ''
+                    }`}
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={incrementAmount}
+                  className="p-3 bg-gray-100 rounded-r-xl text-gray-600 hover:bg-gray-200 transition-colors border border-gray-300"
+                >
+                  <Plus size={20} />
+                </button>
+              </div>
+              {errors.amount && (
+                <p className="mt-2 text-sm text-red-600 flex items-center">
+                  <AlertCircle size={16} className="mr-1" />
+                  {errors.amount}
+                </p>
+              )}
+              <p className="mt-2 text-sm text-gray-500">
+                Current amount: {formatAmount(formData.amount)}
+              </p>
+            </div>
+
+            {/* Payment System Dropdown */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
+                <span className="text-red-500 mr-1">*</span>
+                Payment System
+              </label>
+              <select
+                name="paymentSystem"
+                value={formData.paymentSystem}
                 onChange={handleInputChange}
                 onBlur={handleBlur}
-                error={errors.referencePerson}
-                required
-                placeholder="Dharma[24070]es-d27b-4aa7-9652-d979fd48826B]"
-              />
+                className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all bg-white ${
+                  errors.paymentSystem ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                }`}
+              >
+                <option value="">Select Payment System</option>
+                {loadingPaymentSystems ? (
+                  <option value="" disabled>Loading payment systems...</option>
+                ) : (
+                  paymentSystems.map(system => (
+                    <option key={system.paymentSystemId} value={system.name}>
+                      {system.name}
+                    </option>
+                  ))
+                )}
+              </select>
+              {errors.paymentSystem && (
+                <p className="mt-2 text-sm text-red-600 flex items-center">
+                  <AlertCircle size={16} className="mr-1" />
+                  {errors.paymentSystem}
+                </p>
+              )}
+            </div>
+
+            {/* Reference Person Dropdown */}
+            <div className="md:col-span-2">
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
+                <span className="text-red-500 mr-1">*</span>
+                Reference Person
+              </label>
+              <div className="relative">
+                <select
+                  name="referencePerson"
+                  value={formData.referencePerson}
+                  onChange={handleInputChange}
+                  onBlur={handleBlur}
+                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all bg-white ${
+                    errors.referencePerson ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  }`}
+                >
+                  <option value="">Select Reference Person</option>
+                  <option value="0">- NA</option>
+                  {loadingReferences ? (
+                    <option value="" disabled>Loading references...</option>
+                  ) : (
+                    references.map(ref => (
+                      <option key={ref.id} value={ref.referenceId}>
+                        {`${ref.name} (${ref.referenceId})`}
+                      </option>
+                    ))
+                  )}
+                </select>
+              </div>
+              {errors.referencePerson && (
+                <p className="mt-2 text-sm text-red-600 flex items-center">
+                  <AlertCircle size={16} className="mr-1" />
+                  {errors.referencePerson}
+                </p>
+              )}
             </div>
           </div>
         </FormSection>
@@ -303,27 +598,63 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
         {/* Payment Details */}
         <FormSection title="Payment">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <FormField
-              label="Payment Received Account"
-              name="paymentReceivedAccount"
-              value={formData.paymentReceivedAccount}
-              onChange={handleInputChange}
-              onBlur={handleBlur}
-              error={errors.paymentReceivedAccount}
-              required
-              options={paymentAccountOptions}
-              placeholder="Select Account"
-            />
-            <FormField
-              label="Date"
-              name="date"
-              type="date"
-              value={formData.date}
-              onChange={handleInputChange}
-              onBlur={handleBlur}
-              error={errors.date}
-              required
-            />
+            {/* Payment Received Account Dropdown */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
+                <span className="text-red-500 mr-1">*</span>
+                Payment Received Account
+              </label>
+              <select
+                name="paymentReceivedAccount"
+                value={formData.paymentReceivedAccount}
+                onChange={handleInputChange}
+                onBlur={handleBlur}
+                className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all bg-white ${
+                  errors.paymentReceivedAccount ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                }`}
+              >
+                <option value="">Select Account</option>
+                {loadingAccounts ? (
+                  <option value="" disabled>Loading accounts...</option>
+                ) : (
+                  accounts.map(account => (
+                    <option key={account.accountId} value={account.accountId}>
+                      {account.name}
+                    </option>
+                  ))
+                )}
+              </select>
+              {errors.paymentReceivedAccount && (
+                <p className="mt-2 text-sm text-red-600 flex items-center">
+                  <AlertCircle size={16} className="mr-1" />
+                  {errors.paymentReceivedAccount}
+                </p>
+              )}
+            </div>
+
+            {/* Date Field */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
+                <span className="text-red-500 mr-1">*</span>
+                Date
+              </label>
+              <input
+                type="date"
+                name="date"
+                value={formData.date}
+                onChange={handleInputChange}
+                onBlur={handleBlur}
+                className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all bg-white ${
+                  errors.date ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                }`}
+              />
+              {errors.date && (
+                <p className="mt-2 text-sm text-red-600 flex items-center">
+                  <AlertCircle size={16} className="mr-1" />
+                  {errors.date}
+                </p>
+              )}
+            </div>
           </div>
         </FormSection>
 
@@ -403,27 +734,43 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
         {/* Personal Details */}
         <FormSection title="Personal Details">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* PAN Card Account Type Radio Buttons */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-3">
                 <span className="text-red-500 mr-1">*</span>
                 Pan Card Account Type
               </label>
-              <div className="flex space-x-6">
-                {['Individual', 'HUF', 'Minor'].map((type) => (
-                  <label key={type} className="flex items-center">
-                    <input
-                      type="radio"
-                      name="panCardAccountType"
-                      value={type}
-                      checked={formData.panCardAccountType === type}
-                      onChange={handleInputChange}
-                      className="mr-2 text-cyan-600 focus:ring-cyan-500"
-                    />
-                    <span className="text-sm text-gray-700">{type}</span>
-                  </label>
-                ))}
+              <div className="grid grid-cols-3 gap-2">
+                {loadingPanCardTypes ? (
+                  <div className="col-span-3 flex items-center space-x-2">
+                    <Loader2 size={16} className="animate-spin" />
+                    <span className="text-sm text-gray-500">Loading options...</span>
+                  </div>
+                ) : (
+                  panCardTypes.map(type => (
+                    <label 
+                      key={type.id} 
+                      className={`flex items-center justify-center px-4 py-3 border rounded-xl cursor-pointer transition-all ${
+                        formData.panCardAccountType === type.label 
+                          ? 'bg-cyan-50 border-cyan-500 text-cyan-700' 
+                          : 'border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="panCardAccountType"
+                        value={type.label}
+                        checked={formData.panCardAccountType === type.label}
+                        onChange={handleInputChange}
+                        className="sr-only"
+                      />
+                      <span className="text-sm font-medium">{type.label}</span>
+                    </label>
+                  ))
+                )}
               </div>
             </div>
+
             <FormField
               label="PAN Card Number"
               name="panCardNumber"
@@ -583,32 +930,41 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
             <div className="text-sm text-gray-600">
               <span className="text-red-500">*</span> Required fields
             </div>
-            <button
-              type="submit"
-              disabled={isSubmitting || submitSuccess}
-              className={`flex items-center space-x-2 px-8 py-3 rounded-xl font-semibold transition-all shadow-lg ${
-                isSubmitting || submitSuccess
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white'
-              }`}
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 size={20} className="animate-spin" />
-                  <span>Adding Investor...</span>
-                </>
-              ) : submitSuccess ? (
-                <>
-                  <CheckCircle size={20} />
-                  <span>Added Successfully!</span>
-                </>
-              ) : (
-                <>
-                  <Save size={20} />
-                  <span>Add Investor</span>
-                </>
-              )}
-            </button>
+            <div className="flex items-center space-x-4">
+              <button
+                type="button"
+                onClick={onBack}
+                className="px-6 py-3 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-xl transition-colors font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitting || submitSuccess}
+                className={`flex items-center space-x-2 px-8 py-3 rounded-xl font-semibold transition-all shadow-lg ${
+                  isSubmitting || submitSuccess
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white'
+                }`}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 size={20} className="animate-spin" />
+                    <span>Adding Investor...</span>
+                  </>
+                ) : submitSuccess ? (
+                  <>
+                    <CheckCircle size={20} />
+                    <span>Added Successfully!</span>
+                  </>
+                ) : (
+                  <>
+                    <Save size={20} />
+                    <span>Add Investor</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </form>
