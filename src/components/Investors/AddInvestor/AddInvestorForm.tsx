@@ -376,6 +376,16 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
       submitData.append("investorStatusId", formData.activeInvestor ? "1" : "0");
       submitData.append("nameAsPerBank", formData.nameAsPanCard);
       
+      // Generate userName or set to undefined
+      // Format: RAI + 4 digits (e.g., RAI1234)
+      const userName = formData.firstName && formData.lastName 
+        ? `RAI${Math.floor(1000 + Math.random() * 9000)}`
+        : undefined;
+      
+      if (userName) {
+        submitData.append("userName", userName);
+      }
+      
       // Append files
       if (formData.aadharCardFile) {
         submitData.append("aadharcard", formData.aadharCardFile);
@@ -419,6 +429,39 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
     }
   };
 
+  // Dropdown handlers
+  const handlePaymentSystemSelect = (id: number, name: string) => {
+    setFormData(prev => ({ ...prev, paymentSystem: name }));
+    setIsPaymentSystemOpen(false);
+    if (errors.paymentSystem) {
+      setErrors(prev => ({ ...prev, paymentSystem: '' }));
+    }
+  };
+
+  const handleAccountSelect = (id: string, name: string) => {
+    setFormData(prev => ({ ...prev, paymentReceivedAccount: id }));
+    setIsAccountOpen(false);
+    if (errors.paymentReceivedAccount) {
+      setErrors(prev => ({ ...prev, paymentReceivedAccount: '' }));
+    }
+  };
+
+  const handleRelationSelect = (value: string) => {
+    setFormData(prev => ({ ...prev, nomineeRelation: value }));
+    setIsRelationOpen(false);
+    if (errors.nomineeRelation) {
+      setErrors(prev => ({ ...prev, nomineeRelation: '' }));
+    }
+  };
+
+  const handleStateSelect = (value: string) => {
+    setFormData(prev => ({ ...prev, state: value }));
+    setIsStateOpen(false);
+    if (errors.state) {
+      setErrors(prev => ({ ...prev, state: '' }));
+    }
+  };
+
   // Amount increment/decrement handlers
   const incrementAmount = () => {
     setFormData(prev => ({
@@ -459,39 +502,6 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
     }));
     if (errors.referencePerson) {
       setErrors(prev => ({ ...prev, referencePerson: '' }));
-    }
-  };
-
-  // Dropdown handlers
-  const handlePaymentSystemSelect = (id: number, name: string) => {
-    setFormData(prev => ({ ...prev, paymentSystem: name }));
-    setIsPaymentSystemOpen(false);
-    if (errors.paymentSystem) {
-      setErrors(prev => ({ ...prev, paymentSystem: '' }));
-    }
-  };
-
-  const handleAccountSelect = (id: string, name: string) => {
-    setFormData(prev => ({ ...prev, paymentReceivedAccount: id }));
-    setIsAccountOpen(false);
-    if (errors.paymentReceivedAccount) {
-      setErrors(prev => ({ ...prev, paymentReceivedAccount: '' }));
-    }
-  };
-
-  const handleRelationSelect = (value: string) => {
-    setFormData(prev => ({ ...prev, nomineeRelation: value }));
-    setIsRelationOpen(false);
-    if (errors.nomineeRelation) {
-      setErrors(prev => ({ ...prev, nomineeRelation: '' }));
-    }
-  };
-
-  const handleStateSelect = (value: string) => {
-    setFormData(prev => ({ ...prev, state: value }));
-    setIsStateOpen(false);
-    if (errors.state) {
-      setErrors(prev => ({ ...prev, state: '' }));
     }
   };
 
