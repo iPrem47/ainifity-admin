@@ -347,7 +347,6 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
       submitData.append("amount", formData.amount.toString());
       submitData.append("paymentSystemId", paymentSystems.find(ps => ps.name === formData.paymentSystem)?.paymentSystemId.toString() || "");
       submitData.append("referenceId", formData.referencePerson || "");
-      submitData.append("paymentReceivedAccountId", formData.paymentReceivedAccount);
       
       submitData.append("bankName", formData.bankName);
       submitData.append("bankAccountNumber", formData.bankAccountNumber);
@@ -723,7 +722,7 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
                 </button>
                 
                 {isPaymentSystemOpen && (
-                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                  <div className="absolute z-10 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
                     {loadingPaymentSystems ? (
                       <div className="p-4 text-center">
                         <Loader2 size={20} className="animate-spin mx-auto text-cyan-500 mb-2" />
