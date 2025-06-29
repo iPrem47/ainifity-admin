@@ -92,6 +92,14 @@ const TDSCertificateUploadModal: React.FC<TDSCertificateUploadModalProps> = ({
         submitData.append('tdsCertificateFile', formData.file);
       }
       
+      console.log('Uploading TDS certificate with payload:', {
+        userId: investorId,
+        remarks: formData.remarks,
+        fromDate: formData.fromDate ? new Date(formData.fromDate).toISOString() : null,
+        toDate: formData.toDate ? new Date(formData.toDate).toISOString() : null,
+        file: formData.file ? formData.file.name : null
+      });
+      
       // Call API
       const response = await apiService.post('/tds-certificates/admin', submitData);
       
