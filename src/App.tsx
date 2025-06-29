@@ -8,6 +8,7 @@ import UsersTable from './components/UsersTable';
 import ProfitLoss from './components/ProfitLoss';
 import ViewInvestors from './components/Investors/ViewInvestors';
 import AddInvestor from './components/Investors/AddInvestor/AddInvestor';
+import EditInvestor from './components/Investors/EditInvestor/EditInvestor';
 import Referrals from './components/Investors/Referrals/Referrals';
 import ReferenceInvestors from './components/Investors/Referrals/ReferenceInvestors/ReferenceInvestors';
 import Dashboard from './components/Dashboard/Dashboard';
@@ -47,6 +48,7 @@ const DashboardLayout: React.FC = () => {
               <Route path="/investors" element={<ViewInvestors />} />
               <Route path="/investors/pending" element={<PendingInvestors />} />
               <Route path="/investors/add" element={<AddInvestor onBack={() => window.history.back()} />} />
+              <Route path="/investors/edit/:investorId" element={<EditInvestor />} />
               <Route path="/investors/:investorId" element={<InvestorDetails />} />
               <Route path="/investors/referrals" element={<Referrals />} />
               <Route path="/reference-investors/:referenceId" element={<ReferenceInvestors />} />

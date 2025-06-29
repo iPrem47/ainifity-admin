@@ -102,7 +102,7 @@ const ViewInvestors: React.FC = () => {
 
   const handleEditInvestor = (investor: Investor) => {
     console.log('Edit investor:', investor);
-    // Implement edit investor modal/page
+    navigate(`/investors/edit/${investor.id}`);
   };
 
   const handleDeleteInvestor = (investor: Investor) => {
