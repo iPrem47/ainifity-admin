@@ -357,7 +357,6 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
       submitData.append("amount", formData.amount.toString());
       submitData.append("paymentSystemId", paymentSystems.find(ps => ps.name === formData.paymentSystem)?.paymentSystemId.toString() || "");
       submitData.append("referenceId", formData.referencePerson || "");
-      submitData.append("paymentReceivedAccountId", formData.paymentReceivedAccount);
       
       submitData.append("bankName", formData.bankName);
       submitData.append("bankAccountNumber", formData.bankAccountNumber);
