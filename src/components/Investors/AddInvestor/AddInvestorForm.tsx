@@ -276,7 +276,7 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
     }
 
     try {
-      const response = await apiService.checkPanCard(input.toUpperCase());
+      const response = await apiService.post('/user-finance/checkPanCard', { panCardNumber: input.toUpperCase() });
 
       if (response?.data?.exists) {
         setPanCardError("This PAN card is already registered.");
@@ -403,7 +403,7 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
       }
 
       // Call API to add investor
-      const response = await apiService.addInvestor(submitData);
+      const response = await apiService.post('/investor/admin/addInvestor', submitData);
       
       if (response.success) {
         setSubmitSuccess(true);
@@ -418,7 +418,9 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
       }
     } catch (error: any) {
       console.error('Error adding investor:', error);
-      setSubmitError(error.message || 'Failed to add investor. Please try again.');
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to add investor. Please try again.';
+      setSubmitError(errorMessage);
+      showNotification(errorMessage, 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -508,6 +510,34 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount);
+  };
+
+  const showNotification = (message: string, type: 'success' | 'error') => {
+    // Create a simple toast notification
+    const toast = document.createElement('div');
+    toast.className = `fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg text-white font-medium transition-all duration-300 ${
+      type === 'success' ? 'bg-green-500' : 'bg-red-500'
+    }`;
+    toast.textContent = message;
+    
+    document.body.appendChild(toast);
+    
+    // Animate in
+    setTimeout(() => {
+      toast.style.transform = 'translateX(0)';
+      toast.style.opacity = '1';
+    }, 100);
+    
+    // Remove after 4 seconds
+    setTimeout(() => {
+      toast.style.transform = 'translateX(100%)';
+      toast.style.opacity = '0';
+      setTimeout(() => {
+        if (document.body.contains(toast)) {
+          document.body.removeChild(toast);
+        }
+      }, 300);
+    }, 4000);
   };
 
   return (
