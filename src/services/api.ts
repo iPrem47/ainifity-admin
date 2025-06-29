@@ -60,6 +60,11 @@ class ApiService {
     );
   }
 
+  // Get base URL
+  getBaseUrl(): string {
+    return BASE_URL;
+  }
+
   // Auth endpoints
   async login(credentials: { userName: string; password: string }) {
     const response = await this.api.post('/auth/admin/login', credentials);
@@ -145,24 +150,12 @@ class ApiService {
   }
 
   // Add Funds endpoints
-  async getAddFundsRequests(params: { page: number; limit: number; search?: string; transactionStatusId?: number | null }) {
-    const queryParams = new URLSearchParams({
-      transactionTypeId: '1', // Always 1 for Add Funds
-      page: params.page.toString(),
-      limit: params.limit.toString()
+  async addFunds(formData: FormData) {
+    const response = await this.api.post('/transaction/admin/addFunds', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
     });
-
-    if (params.search) {
-      queryParams.append('search', params.search);
-    }
-
-    if (params.transactionStatusId !== undefined && params.transactionStatusId !== null) {
-      queryParams.append('transactionStatusId', params.transactionStatusId.toString());
-    }
-
-    console.log('Fetching add funds with URL:', `/transaction/admin/getAddWithdrawRequest?${queryParams.toString()}`);
-    
-    const response = await this.api.get(`/transaction/admin/getAddWithdrawRequest?${queryParams.toString()}`);
     return response.data;
   }
 
