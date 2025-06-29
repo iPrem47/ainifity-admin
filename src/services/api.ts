@@ -87,6 +87,12 @@ class ApiService {
     return response.data;
   }
 
+  // Approve Investor endpoint
+  async approveInvestor(investorId: string) {
+    const response = await this.api.patch(`/investor/admin/approve/${investorId}`);
+    return response.data;
+  }
+
   // User endpoints
   async getAllUsers(params: { page: number; limit: number; search: string; userType?: string; status?: string }) {
     const queryParams = new URLSearchParams({
@@ -283,6 +289,11 @@ class ApiService {
 
   async delete<T = any>(url: string, config?: AxiosRequestConfig): Promise<T> {
     const response: AxiosResponse<T> = await this.api.delete(url, config);
+    return response.data;
+  }
+
+  async patch<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+    const response: AxiosResponse<T> = await this.api.patch(url, data, config);
     return response.data;
   }
 

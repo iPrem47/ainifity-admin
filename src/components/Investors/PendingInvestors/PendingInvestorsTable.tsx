@@ -17,6 +17,8 @@ import {
 import { usePendingInvestors } from './hooks/usePendingInvestors';
 import { PendingInvestor, PendingInvestorAction } from './types';
 import PendingInvestorsPagination from './PendingInvestorsPagination';
+import ConfirmationDialog from '../../common/ConfirmationDialog';
+import { apiService } from '../../../services/api';
 
 const PendingInvestorsTable: React.FC = () => {
   const { investors, loading, error, pagination, filters, setFilters, refetch } = usePendingInvestors();
@@ -24,6 +26,10 @@ const PendingInvestorsTable: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isPaymentSystemOpen, setIsPaymentSystemOpen] = useState(false);
   const [selectedPaymentSystem, setSelectedPaymentSystem] = useState('All');
+  const [processingInvestorId, setProcessingInvestorId] = useState<string | null>(null);
+  const [isApproveDialogOpen, setIsApproveDialogOpen] = useState(false);
+  const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
+  const [selectedInvestor, setSelectedInvestor] = useState<PendingInvestor | null>(null);
 
   // Payment system options
   const paymentSystemOptions = [
@@ -111,37 +117,66 @@ const PendingInvestorsTable: React.FC = () => {
     console.log('Pending investor action:', action);
     
     if (action.type === 'approve') {
-      if (window.confirm('Are you sure you want to approve this investor?')) {
-        try {
-          console.log('Approving investor:', action.investorId);
-          // TODO: Implement API call to approve investor
-          // await apiService.post(`/investor/admin/approve/${action.investorId}`);
-          showNotification('Investor approved successfully!', 'success');
-          await refetch();
-        } catch (error) {
-          console.error('Error approving investor:', error);
-          showNotification('Failed to approve investor', 'error');
-        }
+      const investor = investors.find(inv => inv._id === action.investorId);
+      if (investor) {
+        setSelectedInvestor(investor);
+        setIsApproveDialogOpen(true);
       }
     } else if (action.type === 'reject') {
-      if (window.confirm('Are you sure you want to reject this investor? This action cannot be undone.')) {
-        try {
-          console.log('Rejecting investor:', action.investorId);
-          // TODO: Implement API call to reject investor
-          // await apiService.post(`/investor/admin/reject/${action.investorId}`);
-          showNotification('Investor rejected successfully!', 'success');
-          await refetch();
-        } catch (error) {
-          console.error('Error rejecting investor:', error);
-          showNotification('Failed to reject investor', 'error');
-        }
+      const investor = investors.find(inv => inv._id === action.investorId);
+      if (investor) {
+        setSelectedInvestor(investor);
+        setIsRejectDialogOpen(true);
       }
     } else if (action.type === 'view') {
       console.log('Viewing investor:', action.investorId);
       // TODO: Implement view investor modal/page
-    } else if (action.type === 'edit') {
-      console.log('Editing investor:', action.investorId);
-      // TODO: Implement edit investor modal/page
+    }
+  };
+
+  const handleApproveInvestor = async () => {
+    if (!selectedInvestor) return;
+    
+    try {
+      setProcessingInvestorId(selectedInvestor._id);
+      
+      // Call API to approve investor
+      const response = await apiService.patch(`/investor/admin/approve/${selectedInvestor._id}`);
+      
+      if (response.success) {
+        showNotification(`Investor ${selectedInvestor.name} approved successfully!`, 'success');
+        await refetch();
+      } else {
+        throw new Error(response.message || 'Failed to approve investor');
+      }
+    } catch (error: any) {
+      console.error('Error approving investor:', error);
+      showNotification(error.message || 'Failed to approve investor', 'error');
+    } finally {
+      setProcessingInvestorId(null);
+      setIsApproveDialogOpen(false);
+      setSelectedInvestor(null);
+    }
+  };
+
+  const handleRejectInvestor = async () => {
+    if (!selectedInvestor) return;
+    
+    try {
+      setProcessingInvestorId(selectedInvestor._id);
+      
+      // TODO: Implement API call to reject investor
+      // await apiService.post(`/investor/admin/reject/${selectedInvestor._id}`);
+      
+      showNotification(`Investor ${selectedInvestor.name} rejected successfully!`, 'success');
+      await refetch();
+    } catch (error: any) {
+      console.error('Error rejecting investor:', error);
+      showNotification(error.message || 'Failed to reject investor', 'error');
+    } finally {
+      setProcessingInvestorId(null);
+      setIsRejectDialogOpen(false);
+      setSelectedInvestor(null);
     }
   };
 
@@ -448,13 +483,19 @@ const PendingInvestorsTable: React.FC = () => {
                           onClick={() => handleInvestorAction({ type: 'approve', investorId: investor._id })}
                           className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
                           title="Approve Investor"
+                          disabled={processingInvestorId === investor._id}
                         >
-                          <CheckCircle size={16} />
+                          {processingInvestorId === investor._id ? (
+                            <Loader2 size={16} className="animate-spin text-green-600" />
+                          ) : (
+                            <CheckCircle size={16} />
+                          )}
                         </button>
                         <button 
                           onClick={() => handleInvestorAction({ type: 'reject', investorId: investor._id })}
                           className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                           title="Reject Investor"
+                          disabled={processingInvestorId === investor._id}
                         >
                           <XCircle size={16} />
                         </button>
@@ -462,6 +503,7 @@ const PendingInvestorsTable: React.FC = () => {
                           onClick={() => handleInvestorAction({ type: 'view', investorId: investor._id })}
                           className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
                           title="View Details"
+                          disabled={processingInvestorId === investor._id}
                         >
                           <Eye size={16} />
                         </button>
@@ -489,6 +531,36 @@ const PendingInvestorsTable: React.FC = () => {
           loading={loading}
         />
       )}
+
+      {/* Approve Confirmation Dialog */}
+      <ConfirmationDialog
+        isOpen={isApproveDialogOpen}
+        title="Approve Investor"
+        message={`Are you sure you want to approve ${selectedInvestor?.name}?`}
+        confirmText="Approve"
+        cancelText="Cancel"
+        onConfirm={handleApproveInvestor}
+        onCancel={() => {
+          setIsApproveDialogOpen(false);
+          setSelectedInvestor(null);
+        }}
+        type="info"
+      />
+
+      {/* Reject Confirmation Dialog */}
+      <ConfirmationDialog
+        isOpen={isRejectDialogOpen}
+        title="Reject Investor"
+        message={`Are you sure you want to reject ${selectedInvestor?.name}? This action cannot be undone.`}
+        confirmText="Reject"
+        cancelText="Cancel"
+        onConfirm={handleRejectInvestor}
+        onCancel={() => {
+          setIsRejectDialogOpen(false);
+          setSelectedInvestor(null);
+        }}
+        type="danger"
+      />
     </div>
   );
 };
