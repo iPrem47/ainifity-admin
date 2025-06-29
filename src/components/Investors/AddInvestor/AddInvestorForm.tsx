@@ -334,7 +334,7 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
       
       // Generate a random username in the format RAI1234
       const userName = undefined;
-      submitData.append("userName", userName);
+      submitData.append("userName", undefined);
       
       submitData.append("nameAsPerPanCard", formData.nameAsPanCard);
       submitData.append("firstName", formData.firstName);
