@@ -357,6 +357,7 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
       submitData.append("amount", formData.amount.toString());
       submitData.append("paymentSystemId", paymentSystems.find(ps => ps.name === formData.paymentSystem)?.paymentSystemId.toString() || "");
       submitData.append("referenceId", formData.referencePerson || "");
+      submitData.append("paymentReceivedAccountId", formData.paymentReceivedAccount);
       
       submitData.append("bankName", formData.bankName);
       submitData.append("bankAccountNumber", formData.bankAccountNumber);
@@ -411,6 +412,7 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
         amount: formData.amount,
         paymentSystemId: paymentSystems.find(ps => ps.name === formData.paymentSystem)?.paymentSystemId,
         referenceId: formData.referencePerson,
+        paymentReceivedAccountId: formData.paymentReceivedAccount,
         // Files are included in FormData but not logged here
       });
 
@@ -573,32 +575,32 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
         </div>
       </div>
 
+      {/* Success/Error Messages */}
+      {submitSuccess && (
+        <div className="bg-green-50 border border-green-200 rounded-2xl p-6">
+          <div className="flex items-center space-x-3">
+            <CheckCircle size={24} className="text-green-600" />
+            <div>
+              <h3 className="text-green-800 font-semibold">Investor Added Successfully!</h3>
+              <p className="text-green-600">Redirecting to investors list...</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {submitError && (
+        <div className="bg-red-50 border border-red-200 rounded-2xl p-6">
+          <div className="flex items-center space-x-3">
+            <AlertCircle size={24} className="text-red-600" />
+            <div>
+              <h3 className="text-red-800 font-semibold">Submission Error</h3>
+              <p className="text-red-600">{submitError}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Success/Error Messages */}
-        {submitSuccess && (
-          <div className="bg-green-50 border border-green-200 rounded-2xl p-6">
-            <div className="flex items-center space-x-3">
-              <CheckCircle size={24} className="text-green-600" />
-              <div>
-                <h3 className="text-green-800 font-semibold">Investor Added Successfully!</h3>
-                <p className="text-green-600">Redirecting to investors list...</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {submitError && (
-          <div className="bg-red-50 border border-red-200 rounded-2xl p-6">
-            <div className="flex items-center space-x-3">
-              <AlertCircle size={24} className="text-red-600" />
-              <div>
-                <h3 className="text-red-800 font-semibold">Submission Error</h3>
-                <p className="text-red-600">{submitError}</p>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Basic Details */}
         <FormSection title="Basic Details">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -785,6 +787,66 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
         {/* Payment Details */}
         <FormSection title="Payment">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Payment Received Account Dropdown */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
+                <span className="text-red-500 mr-1">*</span>
+                Payment Received Account
+              </label>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setIsAccountOpen(!isAccountOpen)}
+                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all bg-white text-left flex items-center justify-between ${
+                    errors.paymentReceivedAccount ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  }`}
+                >
+                  <span className={formData.paymentReceivedAccount ? 'text-gray-900' : 'text-gray-400'}>
+                    {accounts.find(acc => acc.accountId === formData.paymentReceivedAccount)?.name || 'Select Account'}
+                  </span>
+                  <ChevronDown 
+                    size={20} 
+                    className={`text-gray-400 transition-transform ${isAccountOpen ? 'rotate-180' : ''}`} 
+                  />
+                </button>
+                
+                {isAccountOpen && (
+                  <div className="absolute z-10 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                    {loadingAccounts ? (
+                      <div className="p-4 text-center">
+                        <Loader2 size={20} className="animate-spin mx-auto text-cyan-500 mb-2" />
+                        <p className="text-sm text-gray-500">Loading accounts...</p>
+                      </div>
+                    ) : (
+                      accounts.map(account => (
+                        <div 
+                          key={account.accountId} 
+                          className="px-4 py-3 hover:bg-gray-50 cursor-pointer flex items-center justify-between"
+                          onClick={() => handleAccountSelect(account.accountId, account.name)}
+                        >
+                          <div>
+                            <span className="text-gray-900">{account.name}</span>
+                            <span className={`ml-2 text-xs ${account.amountColour === 'green' ? 'text-green-600' : 'text-red-600'}`}>
+                              {account.balance.toLocaleString()}
+                            </span>
+                          </div>
+                          {formData.paymentReceivedAccount === account.accountId && (
+                            <CheckCircle size={16} className="text-cyan-500" />
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+              {errors.paymentReceivedAccount && (
+                <p className="mt-2 text-sm text-red-600 flex items-center">
+                  <AlertCircle size={16} className="mr-1" />
+                  {errors.paymentReceivedAccount}
+                </p>
+              )}
+            </div>
+
             {/* Date Field */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-3">

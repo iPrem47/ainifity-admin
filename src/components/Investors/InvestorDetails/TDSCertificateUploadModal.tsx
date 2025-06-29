@@ -72,7 +72,7 @@ const TDSCertificateUploadModal: React.FC<TDSCertificateUploadModalProps> = ({
     try {
       // Create FormData for file upload
       const submitData = new FormData();
-      submitData.append('userId', investorId);
+      submitData.append('investorId', investorId);
       
       if (formData.remarks) {
         submitData.append('remarks', formData.remarks);
@@ -93,7 +93,7 @@ const TDSCertificateUploadModal: React.FC<TDSCertificateUploadModalProps> = ({
       }
       
       console.log('Uploading TDS certificate with payload:', {
-        userId: investorId,
+        investorId: investorId,
         remarks: formData.remarks,
         fromDate: formData.fromDate ? new Date(formData.fromDate).toISOString() : null,
         toDate: formData.toDate ? new Date(formData.toDate).toISOString() : null,
