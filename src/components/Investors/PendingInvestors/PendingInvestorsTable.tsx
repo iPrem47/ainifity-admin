@@ -113,7 +113,7 @@ const PendingInvestorsTable: React.FC = () => {
     });
   };
 
-  const handleInvestorAction = async (action: PendingInvestorAction) => {
+  const handleTransactionAction = async (action: PendingInvestorAction) => {
     console.log('Pending investor action:', action);
     
     if (action.type === 'approve') {
@@ -480,19 +480,19 @@ const PendingInvestorsTable: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center space-x-2">
                         <button 
-                          onClick={() => handleInvestorAction({ type: 'approve', investorId: investor._id })}
-                          className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                          title="Approve Investor"
+                          onClick={() => handleTransactionAction({ type: 'approve', investorId: investor._id })}
+                          className="flex items-center space-x-1 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                           disabled={processingInvestorId === investor._id}
                         >
                           {processingInvestorId === investor._id ? (
-                            <Loader2 size={16} className="animate-spin text-green-600" />
+                            <Loader2 size={16} className="animate-spin" />
                           ) : (
                             <CheckCircle size={16} />
                           )}
+                          <span className="text-sm font-medium">Approve</span>
                         </button>
                         <button 
-                          onClick={() => handleInvestorAction({ type: 'reject', investorId: investor._id })}
+                          onClick={() => handleTransactionAction({ type: 'reject', investorId: investor._id })}
                           className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                           title="Reject Investor"
                           disabled={processingInvestorId === investor._id}
@@ -500,7 +500,7 @@ const PendingInvestorsTable: React.FC = () => {
                           <XCircle size={16} />
                         </button>
                         <button 
-                          onClick={() => handleInvestorAction({ type: 'view', investorId: investor._id })}
+                          onClick={() => handleTransactionAction({ type: 'view', investorId: investor._id })}
                           className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
                           title="View Details"
                           disabled={processingInvestorId === investor._id}
