@@ -16,6 +16,7 @@ interface AddInvestorFormProps {
 
 const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) => {
   const [formData, setFormData] = useState<InvestorFormData>({
+    userName: undefined,
     nameAsPanCard: '',
     firstName: '',
     lastName: '',
