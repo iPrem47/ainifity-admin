@@ -265,6 +265,17 @@ class ApiService {
     return response.data;
   }
 
+  // Profit & Loss endpoints
+  async saveAmount(payload: { amount: number; date: string; tag: string }) {
+    const response = await this.api.post('/amount/saveAmount', payload);
+    return response.data;
+  }
+
+  async finalAmount(payload: { amount: number; date: string; tag: string }) {
+    const response = await this.api.post('/amount/finalAmount', payload);
+    return response.data;
+  }
+
   // Transaction endpoints - Changed from GET to POST
   async getAllAmounts() {
     const response = await this.api.post('/amount/getAllAmount', {});
