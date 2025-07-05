@@ -108,8 +108,6 @@ const FormField: React.FC<FormFieldProps> = ({
       {renderInput()}
       {error && (
         <div className="flex items-center space-x-2 text-red-600">
-           inputMode={inputMode}
-           maxLength={maxLength}
           <AlertCircle size={16} />
           <span className="text-sm">{error}</span>
         </div>
