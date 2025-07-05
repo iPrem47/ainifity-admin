@@ -94,6 +94,8 @@ const FormField: React.FC<FormFieldProps> = ({
           disabled={disabled}
           placeholder={placeholder}
           className={`${baseInputClasses} ${prefix ? 'pl-12' : ''}`}
+          inputMode={inputMode}
+          maxLength={maxLength}
         />
       </div>
     );

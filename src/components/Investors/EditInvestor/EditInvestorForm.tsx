@@ -297,6 +297,20 @@ const EditInvestorForm: React.FC<EditInvestorFormProps> = ({ investorData, onBac
       processedValue = (e.target as HTMLInputElement).checked;
     }
 
+    // For aadharCard and bankAccountNumber, ensure only numbers
+    if ((name === 'aadharCard' || name === 'nomineeAadharNumber') && value) {
+      if (!/^\d*$/.test(value)) return; // Only allow digits
+    }
+
+    if (name === 'bankAccountNumber' && value) {
+      if (!/^\d*$/.test(value)) return; // Only allow digits
+    }
+
+    // For IFSC, convert to uppercase
+    if (name === 'ifsc') {
+      processedValue = value.toUpperCase();
+    }
+
     setFormData(prev => ({
       ...prev,
       [name]: processedValue
@@ -313,6 +327,15 @@ const EditInvestorForm: React.FC<EditInvestorFormProps> = ({ investorData, onBac
     // Check PAN card when user enters it
     if (name === 'panCardNumber' && value) {
       handleCheckPanCard(value);
+    }
+
+    // Validate on input
+    const error = validateSingleField(name, processedValue, formData);
+    if (error) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: error
+      }));
     }
   };
 
@@ -551,7 +574,7 @@ const EditInvestorForm: React.FC<EditInvestorFormProps> = ({ investorData, onBac
               <p className="text-green-600">Redirecting to investors list...</p>
             </div>
           </div>
-        </div>
+    </form>
       )}
 
       {submitError && (

@@ -247,6 +247,20 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
       processedValue = (e.target as HTMLInputElement).checked;
     }
 
+    // For aadharCard and bankAccountNumber, ensure only numbers
+    if ((name === 'aadharCard' || name === 'nomineeAadharNumber') && value) {
+      if (!/^\d*$/.test(value)) return; // Only allow digits
+    }
+
+    if (name === 'bankAccountNumber' && value) {
+      if (!/^\d*$/.test(value)) return; // Only allow digits
+    }
+
+    // For IFSC, convert to uppercase
+    if (name === 'ifsc') {
+      processedValue = value.toUpperCase();
+    }
+
     setFormData(prev => ({
       ...prev,
       [name]: processedValue
@@ -263,6 +277,15 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
     // Check PAN card when user enters it
     if (name === 'panCardNumber' && value) {
       handleCheckPanCard(value);
+    }
+
+    // Validate on input
+    const error = validateSingleField(name, processedValue, formData);
+    if (error) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: error
+      }));
     }
   };
 
@@ -578,7 +601,7 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
               <p className="text-green-600">Redirecting to investors list...</p>
             </div>
           </div>
-        </div>
+    </form>
       )}
 
       {submitError && (
