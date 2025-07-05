@@ -574,7 +574,6 @@ const EditInvestorForm: React.FC<EditInvestorFormProps> = ({ investorData, onBac
               <p className="text-green-600">Redirecting to investors list...</p>
             </div>
           </div>
-    </form>
       )}
 
       {submitError && (

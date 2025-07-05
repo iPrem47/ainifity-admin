@@ -601,7 +601,6 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
               <p className="text-green-600">Redirecting to investors list...</p>
             </div>
           </div>
-    </form>
       )}
 
       {submitError && (
