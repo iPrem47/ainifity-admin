@@ -16,8 +16,6 @@ interface FormFieldProps {
   className?: string;
   prefix?: string;
   rows?: number;
-  inputMode?: 'text' | 'numeric' | 'tel' | 'search' | 'email' | 'url';
-  maxLength?: number;
 }
 
 const FormField: React.FC<FormFieldProps> = ({
@@ -34,9 +32,7 @@ const FormField: React.FC<FormFieldProps> = ({
   disabled = false,
   className = '',
   prefix,
-  rows,
-  inputMode,
-  maxLength
+  rows
 }) => {
   const baseInputClasses = `w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all bg-white text-gray-900 placeholder-gray-400 ${
     error ? 'border-red-300 bg-red-50' : 'border-gray-300'
@@ -94,8 +90,6 @@ const FormField: React.FC<FormFieldProps> = ({
           disabled={disabled}
           placeholder={placeholder}
           className={`${baseInputClasses} ${prefix ? 'pl-12' : ''}`}
-          inputMode={inputMode}
-          maxLength={maxLength}
         />
       </div>
     );

@@ -57,17 +57,11 @@ export const validationRules: ValidationRules = {
   },
   bankAccountNumber: {
     required: true,
-    pattern: /^\d{8,17}$/,
+    pattern: /^\d{9,18}$/,
   },
   ifsc: {
     required: true,
-    pattern: /^[A-Z]{4}[0-9]{1}[A-Z0-9]{6}$/,
-    custom: (value: string) => {
-      if (!/^[A-Z]{4}[0-9]{1}[A-Z0-9]{6}$/.test(value)) {
-        return 'IFSC code must be in format: ABCD0123456';
-      }
-      return null;
-    },
+    pattern: /^[A-Z]{4}0[A-Z0-9]{6}$/,
   },
   nomineeName: {
     required: true,
@@ -90,11 +84,6 @@ export const validationRules: ValidationRules = {
   aadharCard: {
     required: true,
     pattern: /^\d{12}$/,
-    custom: (value: string) => {
-      if (!/^\d+$/.test(value)) return 'Aadhar card must contain only numbers';
-      if (value.length !== 12) return 'Aadhar card must be exactly 12 digits';
-      return null;
-    },
   },
   addressLine1: {
     required: true,
@@ -166,7 +155,7 @@ const getPatternErrorMessage = (fieldName: string): string => {
     case 'nomineeAadharNumber':
       return 'Aadhar number must be 12 digits';
     case 'bankAccountNumber':
-      return 'Bank account number must be 8-17 digits';
+      return 'Bank account number must be 9-18 digits';
     case 'ifsc':
       return 'IFSC code must be in format: ABCD0123456';
     case 'pinCode':

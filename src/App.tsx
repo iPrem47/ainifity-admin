@@ -8,7 +8,6 @@ import UsersTable from './components/UsersTable';
 import ProfitLoss from './components/ProfitLoss';
 import ViewInvestors from './components/Investors/ViewInvestors';
 import AddInvestor from './components/Investors/AddInvestor/AddInvestor';
-import EditInvestor from './components/Investors/EditInvestor/EditInvestor';
 import Referrals from './components/Investors/Referrals/Referrals';
 import ReferenceInvestors from './components/Investors/Referrals/ReferenceInvestors/ReferenceInvestors';
 import Dashboard from './components/Dashboard/Dashboard';
@@ -24,8 +23,9 @@ import WithdrawFunds from './components/WithdrawFunds/WithdrawFunds';
 import AllAccounts from './components/AllAccounts/AllAccounts';
 import TallyExport from './components/TallyExport/TallyExport';
 import NotFound from './components/NotFound';
-import PendingInvestors from './components/Investors/PendingInvestors';
-
+// import PendingInvestors from './components/Investors/PendingInvestors';
+import PendingInvestors from './components/Investors/PendingInvestors/PendingInvestors';
+import EditInvestor from './components/Investors/EditInvestor/EditInvestor';
 const DashboardLayout: React.FC = () => {
   return (
     <div className="flex h-screen bg-gray-50">

@@ -17,7 +17,6 @@ interface EditInvestorFormProps {
 
 const EditInvestorForm: React.FC<EditInvestorFormProps> = ({ investorData, onBack, onSubmit }) => {
   const [formData, setFormData] = useState<InvestorFormData>({
-    userName: '',
     nameAsPanCard: '',
     firstName: '',
     lastName: '',
@@ -79,7 +78,7 @@ const EditInvestorForm: React.FC<EditInvestorFormProps> = ({ investorData, onBac
   useEffect(() => {
     if (investorData) {
       setFormData({
-        userName: investorData.userName || '',
+        // userName: investorData.userName || '',
         nameAsPanCard: investorData.nameAsPerPanCard || '',
         firstName: investorData.firstName || '',
         lastName: investorData.lastName || '',
@@ -772,8 +771,6 @@ const EditInvestorForm: React.FC<EditInvestorFormProps> = ({ investorData, onBac
               error={errors.bankAccountNumber}
               required
               placeholder="Investor Bank Account Number"
-              inputMode="numeric"
-              maxLength={17}
             />
             <FormField
               label="IFSC"
@@ -859,8 +856,6 @@ const EditInvestorForm: React.FC<EditInvestorFormProps> = ({ investorData, onBac
               error={errors.nomineeAadharNumber}
               required
               placeholder="Nominee Aadhar Card Number"
-              inputMode="numeric"
-              maxLength={12}
             />
           </div>
         </FormSection>
@@ -957,8 +952,6 @@ const EditInvestorForm: React.FC<EditInvestorFormProps> = ({ investorData, onBac
               error={errors.aadharCard}
               required
               placeholder="Investor Aadhar Card"
-              inputMode="numeric"
-              maxLength={12}
             />
           </div>
 

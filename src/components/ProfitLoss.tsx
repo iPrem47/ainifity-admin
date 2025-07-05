@@ -49,7 +49,7 @@ const ProfitLoss: React.FC = () => {
   } | null>(null);
 
   // Options
-  const tagOptions = ['New', 'Old', 'Investment', 'Dividend', 'Loss', 'Profit', 'Trading', 'Bonus'];
+  const tagOptions = ['New', 'Old'];
   const filterOptions = ['All', 'New', 'Old', 'Investment', 'Dividend', 'Loss', 'Profit', 'Trading', 'Bonus'];
 
   // Calculate statistics using custom hook

@@ -155,9 +155,32 @@ class ApiService {
     return response.data;
   }
 
+
+  // Profit & Loss endpoints
+  async saveAmount(payload: { amount: number; date: string; tag: string }) {
+    const response = await this.api.post('/amount/saveAmount', payload);
+    return response.data;
+  }
+
+  async finalAmount(payload: { amount: number; date: string; tag: string }) {
+    const response = await this.api.post('/amount/finalAmount', payload);
+    return response.data;
+  }
+
   // Add Funds endpoints
   async addFunds(formData: FormData) {
     const response = await this.api.post('/transaction/admin/addFunds', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  }
+
+
+  // Add Funds endpoints
+  async uploadTdsCertificate(formData: FormData) {
+    const response = await this.api.post('/tds-certificates/admin', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -184,6 +207,14 @@ class ApiService {
     console.log('Fetching withdraw funds with URL:', `/transaction/admin/getAddWithdrawRequest?${queryParams.toString()}`);
     
     const response = await this.api.get(`/transaction/admin/getAddWithdrawRequest?${queryParams.toString()}`);
+    return response.data;
+  }
+
+
+
+  // Profit & Loss endpoints
+  async deleteBulkTransaction(payload: { bulkTransactionId: string;}) {
+    const response = await this.api.post('/bulk-transactions/deleteBulkTransaction', payload);
     return response.data;
   }
 
@@ -262,17 +293,6 @@ class ApiService {
   // Tally Export endpoint
   async exportTallyData(payload: { type: string; fromDate: string; toDate: string }) {
     const response = await this.api.post('/export-data/admin/exportData', payload);
-    return response.data;
-  }
-
-  // Profit & Loss endpoints
-  async saveAmount(payload: { amount: number; date: string; tag: string }) {
-    const response = await this.api.post('/amount/saveAmount', payload);
-    return response.data;
-  }
-
-  async finalAmount(payload: { amount: number; date: string; tag: string }) {
-    const response = await this.api.post('/amount/finalAmount', payload);
     return response.data;
   }
 

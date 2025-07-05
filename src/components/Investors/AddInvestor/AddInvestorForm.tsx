@@ -16,7 +16,6 @@ interface AddInvestorFormProps {
 
 const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) => {
   const [formData, setFormData] = useState<InvestorFormData>({
-    userName: undefined,
     nameAsPanCard: '',
     firstName: '',
     lastName: '',
@@ -334,8 +333,8 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
       const submitData = new FormData();
       
       // Generate a random username in the format RAI1234
-      const userName = undefined;
-      submitData.append("userName", undefined);
+      // const userName = undefined;
+      // submitData.append("userName", null);
       
       submitData.append("nameAsPerPanCard", formData.nameAsPanCard);
       submitData.append("firstName", formData.firstName);
@@ -396,7 +395,6 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
       }
 
       console.log('Submitting investor data with payload:', {
-        userName,
         nameAsPerPanCard: formData.nameAsPanCard,
         firstName: formData.firstName,
         lastName: formData.lastName,
@@ -405,12 +403,12 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
         amount: formData.amount,
         paymentSystemId: paymentSystems.find(ps => ps.name === formData.paymentSystem)?.paymentSystemId,
         referenceId: formData.referencePerson,
-        paymentReceivedAccountId: formData.paymentReceivedAccount,
+        // paymentReceivedAccountId: formData.paymentReceivedAccount,
         // Files are included in FormData but not logged here
       });
 
       // Call API to add investor
-      const response = await apiService.post('/investor/admin/addInvestor', submitData);
+      const response = await apiService.addInvestor(submitData);
       
       if (response.success) {
         setSubmitSuccess(true);
@@ -888,8 +886,7 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
               error={errors.bankAccountNumber}
               required
               placeholder="Investor Bank Account Number"
-              inputMode="numeric"
-              maxLength={17}
+
             />
             <FormField
               label="IFSC"
@@ -975,8 +972,6 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
               error={errors.nomineeAadharNumber}
               required
               placeholder="Nominee Aadhar Card Number"
-              inputMode="numeric"
-              maxLength={12}
             />
           </div>
         </FormSection>
@@ -1073,8 +1068,6 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
               error={errors.aadharCard}
               required
               placeholder="Investor Aadhar Card"
-              inputMode="numeric"
-              maxLength={12}
             />
           </div>
 
@@ -1106,54 +1099,17 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
               required
               placeholder="District"
             />
-            
-            {/* State Dropdown */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-3">
-                <span className="text-red-500 mr-1">*</span>
-                State
-              </label>
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setIsStateOpen(!isStateOpen)}
-                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all bg-white text-left flex items-center justify-between ${
-                    errors.state ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                  }`}
-                >
-                  <span className={formData.state ? 'text-gray-900' : 'text-gray-400'}>
-                    {formData.state || 'Select State'}
-                  </span>
-                  <ChevronDown 
-                    size={20} 
-                    className={`text-gray-400 transition-transform ${isStateOpen ? 'rotate-180' : ''}`} 
-                  />
-                </button>
-                
-                {isStateOpen && (
-                  <div className="absolute z-10 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
-                    {stateOptions.map(option => (
-                      <div 
-                        key={option.value} 
-                        className="px-4 py-3 hover:bg-gray-50 cursor-pointer flex items-center justify-between"
-                        onClick={() => handleStateSelect(option.value)}
-                      >
-                        <span className="text-gray-900">{option.label}</span>
-                        {formData.state === option.value && (
-                          <CheckCircle size={16} className="text-cyan-500" />
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-              {errors.state && (
-                <p className="mt-2 text-sm text-red-600 flex items-center">
-                  <AlertCircle size={16} className="mr-1" />
-                  {errors.state}
-                </p>
-              )}
-            </div>
+
+            <FormField
+              label="State"
+              name="state"
+              value={formData.state}
+              onChange={handleInputChange}
+              onBlur={handleBlur}
+              error={errors.district}
+              required
+              placeholder="State"
+            />
             
             <FormField
               label="PinCode"
