@@ -888,6 +888,8 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
               error={errors.bankAccountNumber}
               required
               placeholder="Investor Bank Account Number"
+             inputMode="numeric"
+             maxLength={17}
             />
             <FormField
               label="IFSC"
@@ -1069,6 +1071,8 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
               error={errors.aadharCard}
               required
               placeholder="Investor Aadhar Card"
+             inputMode="numeric"
+             maxLength={12}
             />
           </div>
 

@@ -57,7 +57,7 @@ export const validationRules: ValidationRules = {
   },
   bankAccountNumber: {
     required: true,
-    pattern: /^\d{9,18}$/,
+    pattern: /^\d{8,17}$/,
   },
   ifsc: {
     required: true,
@@ -84,6 +84,11 @@ export const validationRules: ValidationRules = {
   aadharCard: {
     required: true,
     pattern: /^\d{12}$/,
+    custom: (value: string) => {
+      if (!/^\d+$/.test(value)) return 'Aadhar card must contain only numbers';
+      if (value.length !== 12) return 'Aadhar card must be exactly 12 digits';
+      return null;
+    },
   },
   addressLine1: {
     required: true,

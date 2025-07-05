@@ -772,6 +772,8 @@ const EditInvestorForm: React.FC<EditInvestorFormProps> = ({ investorData, onBac
               error={errors.bankAccountNumber}
               required
               placeholder="Investor Bank Account Number"
+             inputMode="numeric"
+             maxLength={17}
             />
             <FormField
               label="IFSC"
@@ -953,6 +955,8 @@ const EditInvestorForm: React.FC<EditInvestorFormProps> = ({ investorData, onBac
               error={errors.aadharCard}
               required
               placeholder="Investor Aadhar Card"
+             inputMode="numeric"
+             maxLength={12}
             />
           </div>
 
