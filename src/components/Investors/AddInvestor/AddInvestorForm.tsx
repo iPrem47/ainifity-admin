@@ -110,32 +110,7 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
       } catch (error) {
         console.error('Error fetching references:', error);
         // Fallback data
-        setReferences([
-          {
-            id: "67f7a173eb52c64544c295b4",
-            name: "Smit Patel",
-            referenceId: "bae074ff-88f2-497f-8e56-ded52c79031d",
-            deleted: false,
-            updatedAt: "2025-04-10T10:46:11.916Z",
-            totalInvestors: 0
-          },
-          {
-            id: "67f7a182eb52c64544c295b7",
-            name: "Akhil Ramani",
-            referenceId: "3c258366-ddf1-412f-8e81-6927fb3e2863",
-            deleted: false,
-            updatedAt: "2025-04-10T10:46:26.137Z",
-            totalInvestors: 0
-          },
-          {
-            id: "67f7a189eb52c64544c295ba",
-            name: "Dharma",
-            referenceId: "24f07be5-d27b-4ea7-9652-d979fd488268",
-            deleted: false,
-            updatedAt: "2025-06-03T04:57:15.035Z",
-            totalInvestors: 1732
-          }
-        ]);
+        setReferences([]);
       } finally {
         setLoadingReferences(false);
       }
@@ -992,14 +967,10 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
                     <span className="text-sm text-gray-500">Loading options...</span>
                   </div>
                 ) : (
-                  panCardTypes.map(type => (
-                    <label 
-                      key={type.id} 
-                      className={`flex items-center justify-center px-4 py-3 border rounded-xl cursor-pointer transition-all ${
-                        formData.panCardAccountType === type.label 
-                          ? 'bg-cyan-50 border-cyan-500 text-cyan-700' 
-                          : 'border-gray-300 hover:bg-gray-50'
-                      }`}
+                  panCardTypes.map((type) => (
+                    <label
+                      key={type.id}
+                      className="flex items-center space-x-2 p-2 cursor-pointer"
                     >
                       <input
                         type="radio"
@@ -1007,14 +978,15 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
                         value={type.label}
                         checked={formData.panCardAccountType === type.label}
                         onChange={handleInputChange}
-                        className="sr-only"
+                        className="text-cyan-600 focus:ring-cyan-500"
                       />
-                      <span className="text-sm font-medium">{type.label}</span>
+                      <span className="text-md">{type.label}</span>
                     </label>
                   ))
                 )}
               </div>
             </div>
+
 
             {/* PAN Card Number with validation */}
             <div>
@@ -1185,11 +1157,7 @@ const AddInvestorForm: React.FC<AddInvestorFormProps> = ({ onBack, onSubmit }) =
               rows={4}
             />
           </div>
-        </FormSection>
-
-        {/* Active Investor Toggle */}
-        <FormSection title="">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3 mt-5">
             <input
               type="checkbox"
               name="activeInvestor"
