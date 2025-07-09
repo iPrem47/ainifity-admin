@@ -49,31 +49,31 @@ export interface InvestorFormData {
 }
 export interface InvestorUpdateFormData {
   // Basic Details
-  nameAsPanCard: string;
+  nameAsPerPanCard: string;
   email: string;
   phoneNumber: string;
 
   // Investment Details
   amount: number;
-  paymentSystem: string;
-  referencePerson: string;
+  paymentSystemId: number;
+  referenceId: string;
 
   // Bank Details
   bankName: string;
   bankAccountNumber: string;
-  ifsc: string;
+  ifscCode: string;
 
   // Nominee Details
   nomineeName: string;
   nomineeRelation: string;
-  nomineeAadharNumber: string;
+  nomineeAadharCardNumber: string;
 
   // Personal Details
-  panCardAccountType: string;
+  panCardTypeId: number;
   panCardNumber: string;
-  aadharCard: string;
-  addressLine1: string;
-  addressLine2: string;
+  aadharCardNumber: string;
+  address1: string;
+  address2: string;
   district: string;
   state: string;
   pinCode: string;
