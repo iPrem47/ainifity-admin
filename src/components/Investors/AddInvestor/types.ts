@@ -12,7 +12,7 @@ export interface InvestorFormData {
   referencePerson: string;
 
   // Payment Details
-  paymentReceivedAccount: string;
+  // paymentReceivedAccount: string;
   date: string;
 
   // Bank Details

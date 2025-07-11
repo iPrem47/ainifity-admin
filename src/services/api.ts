@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 
-const BASE_URL = 'https://6jwvtpvyyv.ap-south-1.awsapprunner.com/v1';
+const BASE_URL = 'http://localhost:8000/v1';
 
 class ApiService {
   private api: AxiosInstance;
@@ -101,6 +101,14 @@ class ApiService {
 
   async exportInvestorData(formData: { investorId: string; type: string; }) {
     const response = await this.api.post('export-data/admin/exportInvestorData', formData, {
+      timeout: 60000, // 60 seconds
+    });
+    return response.data;
+  }
+
+
+  async editTransactionData(transaction_id:string, formData: { amount: number; transactionalBankId: string; date: string }) {
+    const response = await this.api.post(`transaction/admin/updateTransaction/${transaction_id}`, formData, {
       timeout: 60000, // 60 seconds
     });
     return response.data;
