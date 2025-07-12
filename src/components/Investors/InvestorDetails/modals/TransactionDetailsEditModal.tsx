@@ -8,12 +8,14 @@ interface TransactionDetailsEditModalProps {
   isOpen: boolean;
   onClose: () => void;
   transaction: any;
+  onSuccess: () => void;
 }
 
 const TransactionDetailsEditModal: React.FC<TransactionDetailsEditModalProps> = ({
   isOpen,
   onClose,
   transaction,
+  onSuccess
 }) => {
   const { accounts, loading: loadingAccounts } = useAccounts();
   const [isAccountOpen, setIsAccountOpen] = useState(false);
@@ -54,6 +56,7 @@ const TransactionDetailsEditModal: React.FC<TransactionDetailsEditModalProps> = 
   };
 
   const handleChange = (key: string, value: any) => {
+    console.log(`Updating ${key} to ${value}`);
     setFormData((prev) => ({
       ...prev,
       [key]: value,
@@ -65,8 +68,7 @@ const TransactionDetailsEditModal: React.FC<TransactionDetailsEditModalProps> = 
       setLoading(true);
       await apiService.editTransactionData(transaction.transactionId, formData);
       showNotification('Transaction updated successfully!', 'success');
-      showNotification('Transaction updated successfully!', 'success');
-      onClose();
+      onSuccess();
     } catch (error:any) {
       console.error("Error updating transaction:", error);
       const errorMessage = error.response?.data?.message || error.message || 'Failed to update transaction. Please try again.';
@@ -214,10 +216,11 @@ const TransactionDetailsEditModal: React.FC<TransactionDetailsEditModalProps> = 
 
             <div>
               <label className="block text-xs text-gray-500 mb-1">Date</label>
+              
               <input
                 type="date"
                 value={formData.date}
-                onChange={(e) => handleChange("createdAt", e.target.value)}
+                onChange={(e) => handleChange("date", e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all bg-white text-gray-900"
               />
             </div>
