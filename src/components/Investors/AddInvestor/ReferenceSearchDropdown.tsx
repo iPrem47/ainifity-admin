@@ -78,9 +78,9 @@ const ReferenceSearchDropdown: React.FC<ReferenceSearchDropdownProps> = ({
               <div className="text-sm font-semibold text-gray-900 truncate">
                 {selectedReference.name}
               </div>
-              <div className="text-xs text-gray-500 truncate">
+              {/* <div className="text-xs text-gray-500 truncate">
                 {selectedReference.referenceId}
-              </div>
+              </div> */}
             </div>
           ) : (
             <span className="text-gray-400">{placeholder}</span>

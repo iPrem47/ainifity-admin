@@ -52,9 +52,6 @@ export interface InvestorUpdateFormData {
   nameAsPerPanCard: string;
   email: string;
   phoneNumber: string;
-
-  // Investment Details
-  amount: number;
   paymentSystemId: number;
   referenceId: string;
 
@@ -85,10 +82,6 @@ export interface InvestorUpdateFormData {
   chequePassbookFile?: File;
   bankStatementFile?: File;
   signatureFile?: File;
-  description: string;
-
-  // Status
-  activeInvestor: boolean;
 }
 
 export interface FormErrors {
